@@ -1,8 +1,11 @@
-from flask import Flask, request, jsonify, render_template, session, redirect,url_for
+from flask import Flask, request, jsonify, render_template, session, redirect,url_for, flash
 import mysql.connector
 from mysql.connector import pooling
+from werkzeug.security import generate_password_hash, check_password_hash
 import bcrypt
+import uuid
 import os
+import hashlib
 import smtplib
 import secrets
 from email.mime.text import MIMEText
@@ -13,6 +16,8 @@ load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY')
+
+print(app.url_map)
 
 # Database connection pool
 db_pool = mysql.connector.pooling.MySQLConnectionPool(
@@ -131,137 +136,130 @@ def register():
 
     return jsonify({"message": "Registration successful"}), 201
 
-# forgot password page
+# Forgot Password page
 @app.route('/forgot-password')
 def forgot_password_page():
-    if 'user_id' in session:
-        return redirect('/dashboard')
     return render_template('forgot-password.html')
 
-# Forgot password API
+
+# Handle forgot password request
 @app.route('/api/forgot-password', methods=['POST'])
-def forgot_password():
+def forgot_password_api():
     data = request.get_json()
-    email = data.get('email')
-
-    if not email:
-        return jsonify({"message": "Email is required"}), 400
-
-    try:
-        conn = db_pool.get_connection()
-        cursor = conn.cursor()
-
-        # Check if the email exists
-        cursor.execute("SELECT id FROM users WHERE email = %s", (email,))
-        user = cursor.fetchone()
-        if not user:
-            return jsonify({"message": "Email not found"}), 404
-
-        # Generate a reset token
-        reset_token = secrets.token_urlsafe(32)
-        expires_at = datetime.now() + timedelta(hours=1) # Token valid for 1 hour
-        
-        print(f"Generated reset token: {reset_token}")  # Debugging line
-
-        # Store the reset token in the database
-        cursor.execute(
-            "INSERT INTO password_reset_tokens (email, token, expires_at) VALUES (%s, %s, %s)",
-            (email, reset_token, expires_at)
-        )
-        conn.commit()
-        
-        print("Token saved in database!")  # Debugging line
-
-        # Send email with the reset link
-        reset_link = url_for("reset_password", _external=True) + f"?token={reset_token}"
-        send_reset_email(email, reset_link)
-
-        return jsonify({"message": "Reset link sent! Check your email."}), 200
-
-    except Exception as e:
-        print(f"Database error: {str(e)}")  # Debugging line
-        return jsonify({"message": f"Database error: {str(e)}"}), 500
-    finally:
-        if 'cursor' in locals():
-            cursor.close()
-        if 'conn' in locals():
-            conn.close()
-
-# Load from environment
-SMTP_SERVER = os.getenv("SMTP_SERVER", "smtp.gmail.com")
-SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
-EMAIL_SENDER = os.getenv("EMAIL_SENDER")
-EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
-
-def send_reset_email(to_email, reset_link):
-    subject = "Password Reset Request"
-    body = f"Click the link below to reset your password:\n\n{reset_link}\n\nIf you didn't request this, ignore this email."
-
-    msg = MIMEText(body)
-    msg["Subject"] = subject
-    msg["From"] = EMAIL_SENDER
-    msg["To"] = to_email
     
-    print(f"Sending email to {to_email} with reset link: {reset_link}")  # Debugging line
-
-    try:
-        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
-        server.starttls()
-        server.login(EMAIL_SENDER, EMAIL_PASSWORD)
-        server.sendmail(EMAIL_SENDER, to_email, msg.as_string())
-        server.quit()
-        print("Email sent successfully!")  # Debugging line
-    except Exception as e:
-        print(f"Failed to send email: {str(e)}")
-
-@app.route('/api/reset-password', methods=['POST'])
-def reset_password():
-    data = request.get_json()
-    token = data.get("token")
-    new_password = data.get("password")
-
-    if not token or not new_password:
-        return jsonify({"message": "Invalid request"}), 400
-
+    if not data or 'email' not in data:
+        return jsonify({"message": "Email is required"}), 400
+    
+    email = data['email']
+    
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM password_reset_tokens WHERE token = %s AND expires_at > NOW()", (token,))
-        reset_entry = cursor.fetchone()
+        cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
+        user = cursor.fetchone()
+        
+        if not user:
+            # Don't reveal if email exists or not for security
+            return jsonify({"message": "If your email exists in our system, you will receive a password reset link"}), 200
+        
+        # Generate a reset token
+        reset_token = str(uuid.uuid4())
+        expiry = datetime.now() + timedelta(hours=24)
+        
+        # Store the reset token in the database
+        cursor.execute("""
+            INSERT INTO password_resets (user_id, token, expires_at) 
+            VALUES (%s, %s, %s)
+            ON DUPLICATE KEY UPDATE token = %s, expires_at = %s
+        """, (user['id'], reset_token, expiry, reset_token, expiry))
+        conn.commit()
+        print(f"Reset token: {reset_token}") #debugging line
+        
+        # Create a reset link
+        reset_link = f"{request.host_url}reset-password/{reset_token}"
+        
+        # Send email with reset link
+        send_password_reset_email(email, reset_link, user['name'])
+        
+        return jsonify({"message": "If your email exists in our system, you will receive a password reset link"}), 200
     except Exception as e:
-        return jsonify({"message": f"Database error: {str(e)}"}), 500
+        return jsonify({"message": f"Error processing request: {str(e)}"}), 500
     finally:
         if 'cursor' in locals():
             cursor.close()
         if 'conn' in locals():
             conn.close()
 
-    if not reset_entry:
-        return jsonify({"message": "Invalid or expired token"}), 400
+# Function to send password reset email
+def send_password_reset_email(email, reset_link, name):
+    try:
+        # Try to get email configuration
+        smtp_server = os.environ.get('SMTP_SERVER')
+        smtp_port = os.environ.get('SMTP_PORT')
+        
+        # For development/testing: print the link instead of sending email
+        if not all([smtp_server, smtp_port]):
+            print(f"===== PASSWORD RESET LINK =====")
+            print(f"For user: {name} ({email})")
+            print(f"Link: {reset_link}")
+            print(f"===============================")
+            return
+    except Exception as e:
+        print(f"Failed to send email: {str(e)}")
+        # Log this error, but don't expose to user
 
-    email = reset_entry["email"]
+@app.route('/reset-password/<token>', methods=['GET'])
+def reset_password_page(token):
+    return render_template('reset-password.html', token=token)
 
-    # Hash new password
-    hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
-
+# Handle password reset
+@app.route('/api/reset-password', methods=['POST'])
+def reset_password_api():
+    data = request.get_json()
+    
+    if not data or 'token' not in data or 'password' not in data:
+        return jsonify({"message": "Token and password are required"}), 400
+    
+    token = data['token']
+    password = data['password']
+    
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("UPDATE users SET password = %s WHERE email = %s", (hashed_password, email))
+        cursor = conn.cursor(dictionary=True)
+        
+        # Find the valid token
+        cursor.execute("""
+            SELECT pr.*, u.email 
+            FROM password_resets pr
+            JOIN users u ON pr.user_id = u.id
+            WHERE pr.token = %s AND pr.expires_at > NOW()
+        """, (token,))
+        
+        reset_request = cursor.fetchone()
+        
+        if not reset_request:
+            return jsonify({"message": "Invalid or expired token"}), 400
+        
+        # Hash the new password
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        
+        # Update the user's password
+        cursor.execute("UPDATE users SET password = %s WHERE id = %s", 
+              (hashed_password.decode('utf-8'), reset_request['user_id']))
+
+        # Delete the used token
+        cursor.execute("DELETE FROM password_resets WHERE id = %s", (reset_request['id'],))
+        
         conn.commit()
+        
+        return jsonify({"message": "Password successfully reset"}), 200
     except Exception as e:
-        return jsonify({"message": f"Database error: {str(e)}"}), 500
+        return jsonify({"message": f"Error processing request: {str(e)}"}), 500
     finally:
         if 'cursor' in locals():
             cursor.close()
         if 'conn' in locals():
             conn.close()
-
-    cursor.execute("DELETE FROM password_resets WHERE email = %s", (email,))  # Remove used token
-    conn.commit()
-    
-    return jsonify({"message": "Password reset successful!", "success": True})
-
 
 # Logout route
 @app.route('/logout')
