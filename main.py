@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template, session, redirect,url_for, flash
+from flask import Flask, request, jsonify, render_template, session, redirect,url_for, flash,Blueprint
 import mysql.connector
 from mysql.connector import pooling
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="website/templates")
 app.secret_key = os.environ.get('SECRET_KEY')
 
 print(app.url_map)
