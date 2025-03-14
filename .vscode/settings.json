@@ -1,12 +1,19 @@
 {
     "cSpell.words": [
+        "bootdey",
         "checkpw",
         "dotenv",
         "edugate",
         "gensalt",
         "hashpw",
+        "linecap",
+        "linejoin",
         "minlength",
         "mypool",
-        "stylesheet"
+        "progressbar",
+        "stylesheet",
+        "valuemax",
+        "valuemin",
+        "valuenow"
     ]
 }

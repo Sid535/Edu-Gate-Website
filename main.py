@@ -38,8 +38,12 @@ def get_db_connection():
 @app.route('/login', methods=['GET'])
 def login_page():
     if 'user_id' in session:
-        return redirect('/dashboard')
+        return redirect('/home')
     return render_template('login.html')
+
+@app.route("/account")
+def account():
+    return render_template("account.html")
 
 # Handle login API request
 @app.route('/api/login', methods=['POST'])
@@ -80,12 +84,12 @@ def login_api():
     else:
         return jsonify({"message": "Invalid email or password"}), 401
 
-# Dashboard route
-@app.route('/dashboard')
-def dashboard():
+# home route
+@app.route('/home')
+def home():
     if 'user_id' not in session:
         return redirect('/login')
-    return render_template('dashboard.html', username=session.get('user_name', 'User'))
+    return render_template('home.html', username=session.get('user_name', 'User'))
 
 # Registration page
 @app.route('/signup')
