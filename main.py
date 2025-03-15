@@ -11,39 +11,26 @@ import secrets
 from email.mime.text import MIMEText
 from datetime import timedelta, datetime
 from dotenv import load_dotenv
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from website import create_app
+from website.__init__ import get_db_connection  # If needed in a specific place
+
 
 load_dotenv()
 
-app = Flask(__name__, template_folder="website/templates")
+app = create_app()
 app.secret_key = os.environ.get('SECRET_KEY')
 
 print(app.url_map)
-
-# Database connection pool
-db_pool = mysql.connector.pooling.MySQLConnectionPool(
-    pool_name="mypool",
-    pool_size=5,
-    host=os.environ.get('DB_HOST', 'localhost'),
-    user=os.environ.get('DB_USER', 'root'),
-    password=os.environ.get('DB_PASSWORD', '12082005'),
-    database=os.environ.get('DB_NAME', 'edugate')
-)
-
-# Get connection from pool
-def get_db_connection():
-    return db_pool.get_connection()
 
 # Serve the login page
 @app.route('/')
 @app.route('/login', methods=['GET'])
 def login_page():
     if 'user_id' in session:
-        return redirect('/home')
+        next_page = request.args.get('next', '/home')
+        return redirect(next_page)
     return render_template('login.html')
-
-@app.route("/account")
-def account():
-    return render_template("account.html")
 
 # Handle login API request
 @app.route('/api/login', methods=['POST'])
@@ -83,13 +70,6 @@ def login_api():
         return jsonify({"message": "Login successful"}), 200
     else:
         return jsonify({"message": "Invalid email or password"}), 401
-
-# home route
-@app.route('/home')
-def home():
-    if 'user_id' not in session:
-        return redirect('/login')
-    return render_template('home.html', username=session.get('user_name', 'User'))
 
 # Registration page
 @app.route('/signup')
@@ -272,4 +252,5 @@ def logout():
     return redirect('/login')
 
 if __name__ == '__main__':
-    app.run(debug=os.environ.get('FLASK_DEBUG', 'False').lower() == 'true')
+    debug_mode = os.environ.get('FLASK_DEBUG', '').lower() in ['1', 'true', 'yes']
+    app.run(debug=debug_mode)
