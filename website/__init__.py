@@ -30,10 +30,11 @@ def create_app():
 
     # User class for Flask-Login
     class User(UserMixin):
-        def __init__(self, id, name, email):
+        def __init__(self, id, name, email, username):
             self.id = id
             self.name = name
             self.email = email
+            self.username = username
 
     # Flask-Login: Load user by ID
     @login_manager.user_loader
@@ -46,7 +47,7 @@ def create_app():
         conn.close()
 
         if user:
-            return User(user["id"], user["name"], user["email"])
+            return User(user["id"], user["name"], user["email"], user["username"])
         return None
 
     # Register blueprints

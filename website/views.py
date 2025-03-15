@@ -45,3 +45,8 @@ def account():
             cursor.close()
         if 'conn' in locals():
             conn.close()
+
+#courses route
+@views.route('/courses')
+def courses():
+    return render_template('courses.html')

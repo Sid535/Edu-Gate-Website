@@ -16,6 +16,9 @@
                     <label for="name" class="form-label">Full Name</label>
                     <input type="text" id="name" name="name" class="form-control" required>
 
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" id="username" name="username" class="form-control" required>
+
                     <label for="email" class="form-label mt-3">Email</label>
                     <input type="email" id="email" name="email" class="form-control" required>
 
@@ -41,6 +44,7 @@
             let name = document.getElementById("name").value;
             let email = document.getElementById("email").value;
             let password = document.getElementById("password").value;
+            let username = document.getElementById("username").value;
             let confirmPassword = document.getElementById("confirm-password").value;
             let errorDiv = document.getElementById("errorMessages");
 
@@ -69,6 +73,7 @@
                 body: JSON.stringify({
                     name: name,
                     email: email,
+                    username: username,
                     password: password
                 })
             })

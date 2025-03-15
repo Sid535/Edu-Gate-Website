@@ -13,3 +13,7 @@
     position: relative;
     left: 0;
   }
+
+body {
+  padding-top: 70px; /* Adjust this value based on your navbar height */
+}

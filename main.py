@@ -82,11 +82,12 @@ def signup_page():
 def register():
     data = request.get_json()
 
-    if not data or 'name' not in data or 'email' not in data or 'password' not in data:
+    if not data or 'name' not in data or 'email' not in data or 'password' not in data or 'username' not in data:
         return jsonify({"message": "Missing required fields"}), 400
 
     name = data['name']
     email = data['email']
+    username = data['username']
     password = data['password'].encode('utf-8')
 
     # Hash the password
@@ -100,10 +101,15 @@ def register():
         cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
         if cursor.fetchone():
             return jsonify({"message": "Email already registered"}), 409
+        
+        # Check if username already exists
+        cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+        if cursor.fetchone():
+            return jsonify({"message": "Username already taken"}), 409
 
         # Insert new user
-        cursor.execute("INSERT INTO users (name, email, password) VALUES (%s, %s, %s)",
-                       (name, email, hashed_password.decode('utf-8')))
+        cursor.execute("INSERT INTO users (name, email, password, username) VALUES (%s, %s, %s, %s)",
+                       (name, email, hashed_password.decode('utf-8'), username))
         conn.commit()
         user_id = cursor.lastrowid
     except Exception as e:
