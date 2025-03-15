@@ -17,3 +17,9 @@
 body {
   padding-top: 70px; /* Adjust this value based on your navbar height */
 }
+
+.logo-image {
+  height: 50px;
+  width: auto;
+  object-fit: contain;
+}
