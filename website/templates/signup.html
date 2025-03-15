@@ -47,11 +47,11 @@
             let username = document.getElementById("username").value;
             let confirmPassword = document.getElementById("confirm-password").value;
             let errorDiv = document.getElementById("errorMessages");
-
+        
             // Clear previous errors
             errorDiv.textContent = "";
             errorDiv.classList.add('d-none');
-
+        
             // Client-side validation
             if (password.length < 6) {
                 errorDiv.textContent = "Password must be at least 6 characters long.";
@@ -63,7 +63,13 @@
                 errorDiv.classList.remove('d-none');
                 return false;
             }
-
+        
+            // Show loading state
+            const submitBtn = document.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Signing up...";
+        
             // Send registration request to the server
             fetch('/register', {
                 method: 'POST',
@@ -78,20 +84,26 @@
                 })
             })
             .then(response => {
+                console.log("Response status:", response.status);
                 if (!response.ok) {
                     return response.text().then(text => { 
+                        console.error("Error response:", text);
                         throw new Error(text || 'Registration failed'); 
                     });
                 }
-                return response.json().catch(() => ({}));  // Handle empty JSON response
+                return response.json().catch(() => {
+                    console.log("Empty or invalid JSON response");
+                    return { message: "Registration successful!" };
+                });
             })
             .then(data => {
                 // Success message before redirection
                 errorDiv.classList.remove('alert-danger');
                 errorDiv.classList.add('alert-success');
-                errorDiv.textContent = "Registration successful! Redirecting...";
+                errorDiv.textContent = data.message || "Registration successful! Redirecting...";
                 errorDiv.classList.remove('d-none');
             
+                // Give the server a moment to set cookies/session before redirecting
                 setTimeout(() => {
                     window.location.href = '/home';
                 }, 1500);
@@ -99,7 +111,12 @@
             .catch(error => {
                 // Show error message
                 errorDiv.textContent = error.message;
+                errorDiv.classList.add('alert-danger');
                 errorDiv.classList.remove('d-none');
+                
+                // Re-enable the submit button
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalBtnText;
             });            
         });
     </script>

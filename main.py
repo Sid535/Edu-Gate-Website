@@ -13,8 +13,8 @@ from datetime import timedelta, datetime
 from dotenv import load_dotenv
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from website import create_app
+from flask_sqlalchemy import SQLAlchemy
 from website.__init__ import get_db_connection  # If needed in a specific place
-
 
 load_dotenv()
 
@@ -27,10 +27,11 @@ print(app.url_map)
 @app.route('/')
 @app.route('/login', methods=['GET'])
 def login_page():
-    if 'user_id' in session:
+    if current_user.is_authenticated:
         next_page = request.args.get('next', '/home')
         return redirect(next_page)
     return render_template('login.html')
+
 
 # Handle login API request
 @app.route('/api/login', methods=['POST'])
@@ -44,10 +45,11 @@ def login_api():
     password = data['password'].encode('utf-8')
     
     try:
+        from website import get_db_connection
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
-        user = cursor.fetchone()
+        user_data = cursor.fetchone()
     except Exception as e:
         return jsonify({"message": f"Database error: {str(e)}"}), 500
     finally:
@@ -56,16 +58,20 @@ def login_api():
         if 'conn' in locals():
             conn.close()
 
-    if not user:
+    if not user_data:
         return jsonify({"message": "Invalid email or password"}), 401
 
     # Verify password
-    stored_password = user['password'].encode('utf-8') if isinstance(user['password'], str) else user['password']
+    stored_password = user_data['password'].encode('utf-8') if isinstance(user_data['password'], str) else user_data['password']
     if bcrypt.checkpw(password, stored_password):
-        session['user_id'] = user['id']
-        session['user_name'] = user['name']
-        session.permanent = True
+        # Create User object for Flask-Login
+        from website import User
+        user = User(user_data["id"], user_data["name"], user_data["email"], user_data["username"])
+        login_user(user, remember=True)
+        
+        # Set session duration
         app.permanent_session_lifetime = timedelta(days=30)
+        session.permanent = True
 
         return jsonify({"message": "Login successful"}), 200
     else:
@@ -77,6 +83,7 @@ def signup_page():
     return render_template('signup.html')
 
 
+# Handle registration API
 # Handle registration API
 @app.route('/register', methods=['POST'])
 def register():
@@ -90,10 +97,11 @@ def register():
     username = data['username']
     password = data['password'].encode('utf-8')
 
-    # Hash the password
+    # Hash the password with bcrypt
     hashed_password = bcrypt.hashpw(password, bcrypt.gensalt())
 
     try:
+        from website import get_db_connection
         conn = get_db_connection()
         cursor = conn.cursor()
 
@@ -112,6 +120,10 @@ def register():
                        (name, email, hashed_password.decode('utf-8'), username))
         conn.commit()
         user_id = cursor.lastrowid
+        
+        # Get the full user data
+        cursor.execute("SELECT * FROM users WHERE id = %s", (user_id,))
+        user_data = cursor.fetchone()
     except Exception as e:
         return jsonify({"message": f"Registration error: {str(e)}"}), 500
     finally:
@@ -120,9 +132,10 @@ def register():
         if 'conn' in locals():
             conn.close()
 
-    # Log the user in
-    session['user_id'] = user_id
-    session['user_name'] = name
+    # Log the user in with Flask-Login
+    from website import User
+    user = User(user_id, name, email, username)
+    login_user(user, remember=True)
 
     return jsonify({"message": "Registration successful"}), 201
 
@@ -143,6 +156,7 @@ def forgot_password_api():
     email = data['email']
     
     try:
+        from website import get_db_connection
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
@@ -183,17 +197,51 @@ def forgot_password_api():
 # Function to send password reset email
 def send_password_reset_email(email, reset_link, name):
     try:
-        # Try to get email configuration
+        # Get email configuration from environment variables
         smtp_server = os.environ.get('SMTP_SERVER')
         smtp_port = os.environ.get('SMTP_PORT')
+        smtp_username = os.environ.get('SMTP_USERNAME')
+        smtp_password = os.environ.get('SMTP_PASSWORD')
+        sender_email = os.environ.get('SENDER_EMAIL', 'noreply@yourdomain.com')
         
         # For development/testing: print the link instead of sending email
-        if not all([smtp_server, smtp_port]):
+        if not all([smtp_server, smtp_port, smtp_username, smtp_password]):
             print(f"===== PASSWORD RESET LINK =====")
             print(f"For user: {name} ({email})")
             print(f"Link: {reset_link}")
             print(f"===============================")
             return
+            
+        # Create email message
+        subject = "Password Reset Request"
+        body = f"""Hello {name},
+
+You recently requested to reset your password. Please click the link below to reset it:
+
+{reset_link}
+
+This link will expire in 24 hours.
+
+If you did not request a password reset, please ignore this email or contact support if you have concerns.
+
+Regards,
+EduGate Team
+"""
+        
+        msg = MIMEText(body)
+        msg['Subject'] = subject
+        msg['From'] = sender_email
+        msg['To'] = email
+        
+        # Send email
+        server = smtplib.SMTP(smtp_server, int(smtp_port))
+        server.starttls()  # Secure the connection
+        server.login(smtp_username, smtp_password)
+        server.send_message(msg)
+        server.quit()
+        
+        print(f"Password reset email sent to {email}")
+        
     except Exception as e:
         print(f"Failed to send email: {str(e)}")
         # Log this error, but don't expose to user
@@ -214,6 +262,7 @@ def reset_password_api():
     password = data['password']
     
     try:
+        from website import get_db_connection
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         
@@ -230,7 +279,7 @@ def reset_password_api():
         if not reset_request:
             return jsonify({"message": "Invalid or expired token"}), 400
         
-        # Hash the new password
+        # Hash the new password using bcrypt
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         
         # Update the user's password
@@ -251,10 +300,11 @@ def reset_password_api():
         if 'conn' in locals():
             conn.close()
 
-# Logout route
+# Logout route using Flask-Login
 @app.route('/logout')
+@login_required
 def logout():
-    session.clear()
+    logout_user()
     return redirect('/login')
 
 if __name__ == '__main__':

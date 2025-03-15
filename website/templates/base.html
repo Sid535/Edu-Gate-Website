@@ -56,8 +56,8 @@
                             </a>
                             <!-- Dropdown menu -->
                             <ul class="dropdown-menu dropdown-menu-end p-1" aria-labelledby="navbarDropdown">
-                                {% if session.get('user_id') %}
-                                    <li><a class="dropdown-item" href="/account">{{ session.get('user_name', 'Your Account') }}</a></li>
+                                {% if current_user.is_authenticated %}
+                                    <li><a class="dropdown-item" href="/account">{{ current_user.name }}</a></li>
                                     <li><a class="dropdown-item" href="#">Help</a></li>
                                     <li><a class="dropdown-item" href="/logout">Log Out</a></li>
                                 {% else %}
