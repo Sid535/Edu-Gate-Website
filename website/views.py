@@ -1,14 +1,20 @@
 from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for, flash, current_app
-from flask_login import login_required, current_user, UserMixin
-from flask_sqlalchemy import SQLAlchemy
+from flask_login import login_required, current_user
 import bcrypt
 import os
+import re
+from .model import db, User
 
 views = Blueprint('views', __name__)
 
 @views.route('/debug-templates')
 def debug_templates():
     return jsonify(templates=current_app.jinja_env.list_templates())
+
+#courses route
+@views.route('/courses')
+def courses():
+    return render_template('courses.html')
 
 # Home route
 @views.route('/home')
@@ -21,11 +27,7 @@ def home():
 @login_required
 def account():
     try:
-        from website import get_db_connection
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM users WHERE id = %s", (current_user.id,))
-        user = cursor.fetchone()
+        user = User.query.get(current_user.id)
         
         if not user:
             from flask_login import logout_user
@@ -35,25 +37,13 @@ def account():
         return render_template('account.html', user=user)
     except Exception as e:
         return f"Error: {str(e)}", 500
-    finally:
-        if 'cursor' in locals():
-            cursor.close()
-        if 'conn' in locals():
-            conn.close()
 
 # Edit account route
 @views.route('/account/edit', methods=['GET', 'POST'])
 @login_required
 def edit_account():
     try:
-        from website import get_db_connection
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-        
-        # Get current user data - using Flask-Login's current_user
-        user_id = current_user.id
-        cursor.execute("SELECT * FROM users WHERE id = %s", (user_id,))
-        user = cursor.fetchone()
+        user = User.query.get(current_user.id)
         
         if not user:
             flash('User not found', 'error')
@@ -63,26 +53,60 @@ def edit_account():
         if request.method == 'POST':
             name = request.form.get('name')
             email = request.form.get('email')
+            username = request.form.get('username')
             password = request.form.get('password')
             
-            # Update user information in database
+            # Name validation
+            if not re.match(r'^[a-zA-Z\s]+$', name):
+                flash('Name should only contain letters and spaces', 'error')
+                return render_template('edit_account.html', user=user)
+            
+            # Username validation
+            if username and not re.match(r'^[a-zA-Z0-9_]+$', username):
+                flash('Username should only contain letters, numbers, and underscores', 'error')
+                return render_template('edit_account.html', user=user)
+                
+            # Email validation
+            if not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email):
+                flash('Please enter a valid email address', 'error')
+                return render_template('edit_account.html', user=user)
+            
+            # Check if the email is already taken by another user
+            if email != user.email:
+                existing_user = User.query.filter(User.email == email, User.id != user.id).first()
+                if existing_user:
+                    flash('Email address is already in use', 'error')
+                    return render_template('edit_account.html', user=user)
+            
+            # Check if the username is already taken by another user
+            if username and username != user.username:
+                existing_user = User.query.filter(User.username == username, User.id != user.id).first()
+                if existing_user:
+                    flash('Username is already taken', 'error')
+                    return render_template('edit_account.html', user=user)
+                
+            # Update user data
+            user.name = name
+            user.email = email
+            if username:
+                user.username = username
+                
+            # Password validation and update
             if password and password.strip():
-                # Use bcrypt for password hashing consistently
-                hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-                cursor.execute(
-                    "UPDATE users SET name = %s, email = %s, password = %s WHERE id = %s",
-                    (name, email, hashed_password, user_id)
-                )
-            else:
-                cursor.execute(
-                    "UPDATE users SET name = %s, email = %s WHERE id = %s",
-                    (name, email, user_id)
-                )
+                if len(password) < 6:
+                    flash('Password must be at least 6 characters long', 'error')
+                    return render_template('edit_account.html', user=user)
+                # Hash the password
+                user.password = User.hash_password(password)
+                    
+            # Save changes to database
+            db.session.commit()
             
-            conn.commit()
-            
-            # Update the current_user object - this doesn't work directly with Flask-Login's implementation
-            # We need to reload the user on next request
+            # Update the current user session
+            current_user.name = name
+            current_user.email = email
+            if username:
+                current_user.username = username
             
             flash('Your account has been updated!', 'success')
             return redirect(url_for('views.account'))
@@ -93,15 +117,3 @@ def edit_account():
     except Exception as e:
         flash(f'An error occurred: {str(e)}', 'error')
         return redirect(url_for('views.account'))
-    
-    finally:
-        if 'cursor' in locals():
-            cursor.close()
-        if 'conn' in locals():
-            conn.close()
-
-#courses route
-@views.route('/courses')
-def courses():
-    return render_template('courses.html')
-

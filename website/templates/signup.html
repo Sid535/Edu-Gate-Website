@@ -14,13 +14,13 @@
                 <div id="errorMessages" class="alert alert-danger d-none"></div>
                 <form id="signupForm">
                     <label for="name" class="form-label">Full Name</label>
-                    <input type="text" id="name" name="name" class="form-control" required>
+                    <input type="text" id="name" name="name" class="form-control" required pattern="[a-zA-Z\s]+" title="Name should only contain letters and spaces">
 
                     <label for="username" class="form-label">Username</label>
-                    <input type="text" id="username" name="username" class="form-control" required>
+                    <input type="text" id="username" name="username" class="form-control" required pattern="[a-zA-Z0-9_]+" title="Username should only contain letters, numbers, and underscores">
 
                     <label for="email" class="form-label mt-3">Email</label>
-                    <input type="email" id="email" name="email" class="form-control" required>
+                    <input type="email" id="email" name="email" class="form-control" required pattern="[^\s@]+@[^\s@]+\.[^\s@]+" title="Please enter a valid email address">
 
                     <label for="password" class="form-label mt-3">Password</label>
                     <input type="password" id="password" name="password" class="form-control" required minlength="6">
@@ -53,6 +53,31 @@
             errorDiv.classList.add('d-none');
         
             // Client-side validation
+            // Name validation - no special characters
+            const nameRegex = /^[a-zA-Z\s]+$/;
+            if (!nameRegex.test(name)) {
+                errorDiv.textContent = "Name should only contain letters and spaces.";
+                errorDiv.classList.remove('d-none');
+                return false;
+            }
+
+            // Username validation - alphanumeric only
+            const usernameRegex = /^[a-zA-Z0-9_]+$/;
+            if (!usernameRegex.test(username)) {
+                errorDiv.textContent = "Username should only contain letters, numbers, and underscores.";
+                errorDiv.classList.remove('d-none');
+                return false;
+            }
+
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                errorDiv.textContent = "Please enter a valid email address.";
+                errorDiv.classList.remove('d-none');
+                return false;
+            }
+
+            // Password validation
             if (password.length < 6) {
                 errorDiv.textContent = "Password must be at least 6 characters long.";
                 errorDiv.classList.remove('d-none');

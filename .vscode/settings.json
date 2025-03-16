@@ -1,9 +1,11 @@
 {
     "cSpell.words": [
+        "backref",
         "bootdey",
         "checkpw",
         "dotenv",
         "edugate",
+        "endfor",
         "gensalt",
         "hashpw",
         "linecap",

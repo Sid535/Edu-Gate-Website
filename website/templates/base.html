@@ -57,7 +57,7 @@
                             <!-- Dropdown menu -->
                             <ul class="dropdown-menu dropdown-menu-end p-1" aria-labelledby="navbarDropdown">
                                 {% if current_user.is_authenticated %}
-                                    <li><a class="dropdown-item" href="/account">{{ current_user.name }}</a></li>
+                                    <li><a class="dropdown-item" href="/account">{{ current_user.username }}</a></li>
                                     <li><a class="dropdown-item" href="#">Help</a></li>
                                     <li><a class="dropdown-item" href="/logout">Log Out</a></li>
                                 {% else %}
