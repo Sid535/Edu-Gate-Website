@@ -1,3 +1,4 @@
+# auth.py file
 from flask import Blueprint, request, jsonify, render_template, session, redirect, url_for, flash
 from flask_login import login_user, login_required, logout_user, current_user
 import bcrypt
@@ -7,7 +8,6 @@ import re
 import smtplib
 from email.mime.text import MIMEText
 from datetime import timedelta, datetime
-from .models import db, User, PasswordReset
 from .models import User, PasswordReset
 from .database import db
 

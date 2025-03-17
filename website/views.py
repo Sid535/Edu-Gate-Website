@@ -1,9 +1,10 @@
+# views.py file
 from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for, flash, current_app
 from flask_login import login_required, current_user
 import bcrypt
 import os
 import re
-from .models import db, User
+from .models import User
 from .database import db
 
 views = Blueprint('views', __name__)
