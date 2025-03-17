@@ -1,6 +1,12 @@
 import os
 from flask import Flask
 from flask_login import LoginManager
+# Register blueprints
+from .database import db
+from .auth import auth
+from .views import views
+from .course_data import course_data
+from .models import load_user, User
 
 def create_app():
     app = Flask(__name__, template_folder="templates")
@@ -15,9 +21,6 @@ def create_app():
     )
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
-    # Import models after app creation to avoid circular imports
-    from .model import db, load_user, User
-
     # Initialize SQLAlchemy
     db.init_app(app)
     
@@ -31,15 +34,15 @@ def create_app():
 
     # Register blueprints
     from .auth import auth
+    from .views import views
+    from .course_data import course_data
+    from .models import model
     app.register_blueprint(auth, url_prefix='/')
 
-    from .views import views
     app.register_blueprint(views, url_prefix='/')
     
-    from .course_data import course_data
     app.register_blueprint(course_data, url_prefix='/')
     
-    from .model import model
     app.register_blueprint(model, url_prefix='/')
     
     @app.context_processor

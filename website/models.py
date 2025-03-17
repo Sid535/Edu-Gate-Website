@@ -4,10 +4,9 @@ from flask_sqlalchemy import SQLAlchemy
 import bcrypt
 import datetime
 import os
+from .database import db
 
-# Initialize SQLAlchemy
-db = SQLAlchemy()
-model = Blueprint('model', __name__)
+models = Blueprint('models', __name__)
 
 # Model definitions
 class User(db.Model, UserMixin):

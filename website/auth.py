@@ -7,7 +7,9 @@ import re
 import smtplib
 from email.mime.text import MIMEText
 from datetime import timedelta, datetime
-from .model import db, User, PasswordReset
+from .models import db, User, PasswordReset
+from .models import User, PasswordReset
+from .database import db
 
 auth = Blueprint('auth', __name__)
 

@@ -3,7 +3,8 @@ from flask_login import login_required, current_user
 import bcrypt
 import os
 import re
-from .model import db, User
+from .models import db, User
+from .database import db
 
 views = Blueprint('views', __name__)
 
