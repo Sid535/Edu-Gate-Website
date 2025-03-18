@@ -25,7 +25,7 @@ def create_app():
     
     # Flask-Login setup
     login_manager = LoginManager()
-    login_manager.login_view = "auth.login_page"  # Assuming blueprint prefix
+    login_manager.login_view = "/login"
     login_manager.init_app(app)
     
     # Import models AFTER initializing db
@@ -35,10 +35,10 @@ def create_app():
     # Register blueprints
     from .auth import auth
     from .views import views
-    from .course_data import course_data
+    from .courses import courses_bp
     
     app.register_blueprint(auth)
     app.register_blueprint(views)
-    app.register_blueprint(course_data, url_prefix='/courses')
+    app.register_blueprint(courses_bp, url_prefix='/courses')
 
     return app
