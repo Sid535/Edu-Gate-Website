@@ -1,5 +1,76 @@
 {% extends 'base.html' %}
+
 {% block title %}Home{% endblock %}
+
 {% block content %}
-<h1>Hii</h1>
+<div class="container mt-5">
+  <!-- Hero Section -->
+  <div class="row mb-5">
+    <div class="col-md-8 offset-md-2 text-center">
+      <h1 class="display-4">Welcome to Our Website</h1>
+      <p class="lead">A modern platform designed to help you achieve your goals.</p>
+      <hr class="my-4">
+      <p>Discover our services and see how we can help you succeed.</p>
+      <a class="btn btn-primary btn-lg" href="#features" role="button">Learn More</a>
+    </div>
+  </div>
+
+  <!-- Features Section -->
+  <div id="features" class="row mb-5">
+    <div class="col-12 text-center mb-4">
+      <h2>Our Features</h2>
+    </div>
+    <div class="col-md-4 mb-4">
+      <div class="card h-100">
+        <div class="card-body text-center">
+          <i class="bi bi-graph-up display-4 text-primary mb-3"></i>
+          <h3 class="card-title">Feature One</h3>
+          <p class="card-text">Personalized Quizzes - AI-driven feedback based on user performance</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-4">
+      <div class="card h-100">
+        <div class="card-body text-center">
+          <i class="bi bi-gear display-4 text-primary mb-3"></i>
+          <h3 class="card-title">Feature Two</h3>
+          <p class="card-text">Customized Reports - Tracks individual progress and provides insights.</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-4">
+      <div class="card h-100">
+        <div class="card-body text-center">
+          <i class="bi bi-shield-check display-4 text-primary mb-3"></i>
+          <h3 class="card-title">Feature Three</h3>
+          <p class="card-text">Community Engagement - Connects students for peer discussions and knowledge sharing.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- About Section -->
+  <div class="row mb-5 align-items-center">
+    <div class="col-md-6">
+      <h2>About Us</h2>
+      <p>
+        EduGATE is an AI-driven practice program designed to help students prepare efficiently
+        for the Graduate Aptitude Test in Engineering (GATE).
+      </p>
+      <p>
+        EduGATE provides detailed performance analytics, enabling students to improve their 
+        problem-solving skills and time management.
+      </p>
+      <a href="#" class="btn btn-outline-primary">Read More</a>
+    </div>
+    <div class="col-md-6 d-flex justify-content-center">
+      <div class="card shadow-sm" style="width: 100%; max-width: 400px;">
+        <img src="/static/images/home_page_book.jpg" alt="About Us" 
+            class="card-img-top rounded" style="object-fit: cover; height: 250px;">
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
+
+EduGATE provides detailed performance analytics, enabling students to improve their problem-solving skills and time management

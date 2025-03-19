@@ -13,11 +13,6 @@ views = Blueprint('views', __name__)
 def debug_templates():
     return jsonify(templates=current_app.jinja_env.list_templates())
 
-#courses route
-@views.route('/courses')
-def courses():
-    return render_template('courses.html')
-
 # Home route
 @views.route('/home')
 @login_required

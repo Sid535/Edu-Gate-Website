@@ -5,7 +5,7 @@ from flask_login import LoginManager
 from .database import db
 from dotenv import load_dotenv
 
-load_dotenv() 
+load_dotenv()
 
 def create_app():
     app = Flask(__name__, template_folder="templates")
