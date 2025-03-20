@@ -5,19 +5,27 @@
         "checkpw",
         "dotenv",
         "edugate",
+        "enctype",
         "endfor",
         "gensalt",
         "hashpw",
+        "httplib",
         "linecap",
         "linejoin",
         "minlength",
         "mypool",
+        "nowrap",
         "ondelete",
         "progressbar",
+        "selectattr",
         "Siddesh",
+        "sqlalchemy",
+        "strftime",
         "stylesheet",
+        "tablist",
         "valuemax",
         "valuemin",
-        "valuenow"
+        "valuenow",
+        "VARCHAR"
     ]
 }

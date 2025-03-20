@@ -36,9 +36,11 @@ def create_app():
     from .auth import auth
     from .views import views
     from .courses import courses_bp
+    from .tests import tests_bp
     
     app.register_blueprint(auth)
     app.register_blueprint(views)
     app.register_blueprint(courses_bp, url_prefix='/courses')
+    app.register_blueprint(tests_bp, url_prefix='/tests')
 
     return app

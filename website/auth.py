@@ -2,6 +2,7 @@
 from flask import Blueprint, request, jsonify, render_template, session, redirect, url_for, flash
 from flask_login import login_user, login_required, logout_user, current_user
 import bcrypt
+import logging
 import uuid
 import os
 import re
@@ -182,21 +183,34 @@ def forgot_password_api():
 
 # Function to send password reset email
 def send_password_reset_email(email, reset_link, name):
+    # Setup logging
+    logger = logging.getLogger(__name__)
+    
+    # Environment configuration
+    is_development = os.environ.get('ENVIRONMENT', 'development') == 'development'
+    
     try:
         # Get email configuration from environment variables
         smtp_server = os.environ.get('SMTP_SERVER')
         smtp_port = os.environ.get('SMTP_PORT')
         smtp_username = os.environ.get('SMTP_USERNAME')
         smtp_password = os.environ.get('SMTP_PASSWORD')
-        sender_email = os.environ.get('SENDER_EMAIL', 'noreply@yourdomain.com')
+        sender_email = os.environ.get('SENDER_EMAIL', 'wgsiddesh535@gmail.com')
         
-        print(f"Email config - Server: {'set' if smtp_server else 'not set'}, Port: {'set' if smtp_port else 'not set'}")  # debugging line
+        logger.debug(f"Email config - Server: {'set' if smtp_server else 'not set'}, Port: {'set' if smtp_port else 'not set'}")
         
         # For development/testing: print the link instead of sending email
-        print(f"===== PASSWORD RESET LINK =====")
-        print(f"For user: {name} ({email})")
+        #if is_development:
+        logger.info(f"===== PASSWORD RESET LINK =====")
+        logger.info(f"For user: {name} ({email})")
+        logger.info(f"Link: {reset_link}")
         print(f"Link: {reset_link}")
-        print(f"===============================")
+        logger.info(f"===============================")
+            
+            # Skip actual email sending in development if configured to do so
+            #if os.environ.get('SKIP_EMAILS', 'false').lower() == 'true':
+            #    logger.info("Email sending skipped in development mode")
+            #    return True
             
         # Create email message
         subject = "Password Reset Request"
@@ -219,16 +233,23 @@ EduGate Team
         msg['From'] = sender_email
         msg['To'] = email
         
+        # Ensure all required credentials are available
+        if not all([smtp_server, smtp_port, smtp_username, smtp_password]):
+            logger.error("Missing SMTP configuration")
+            return False
+        
         # Send email
         server = smtplib.SMTP(smtp_server, int(smtp_port))
         server.starttls()  # Secure the connection
         server.login(smtp_username, smtp_password)
         server.send_message(msg)
         server.quit()
+        logger.info(f"Password reset email sent to {email}")
+        return True
         
     except Exception as e:
-        print(f"Failed to send email: {str(e)}")
-        # Log this error, but don't expose to user
+        logger.error(f"Failed to send email: {str(e)}")
+        return False
 
 @auth.route('/reset-password/<token>', methods=['GET'])
 def reset_password_page(token):
