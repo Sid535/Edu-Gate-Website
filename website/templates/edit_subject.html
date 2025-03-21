@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <h2>Edit Subject: {{ subject.name }}</h2>
+    <form method="post">
+        <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="name" name="name" value="{{ subject.name }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control" id="description" name="description" required>{{ subject.description }}</textarea>
+        </div>
+        <div class="mb-3">
+            <label for="sequence" class="form-label">Sequence</label>
+            <input type="number" class="form-control" id="sequence" name="sequence" value="{{ subject.sequence }}" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Update Subject</button>
+        <a href="{{ url_for('courses.course_details', course_id=subject.course_id) }}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

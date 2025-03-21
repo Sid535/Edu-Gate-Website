@@ -2,7 +2,7 @@
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    username VARCHAR(50) UNIQUE NOT NULL,  -- Added username
+    username VARCHAR(50) UNIQUE NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -31,16 +31,28 @@ CREATE TABLE courses (
     FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
 );
 
--- 4. Tests Table
-CREATE TABLE tests (
+-- 4. subjects
+CREATE TABLE subjects (
     id INT AUTO_INCREMENT PRIMARY KEY,
     course_id INT NOT NULL,
-    name VARCHAR(100) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    sequence INT NOT NULL,  -- Orders subjects within a course
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
 );
 
--- 5. Test Attempts Table
+
+-- 5. Tests Table
+CREATE TABLE tests (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    subject_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE
+);
+
+-- 6. Test Attempts Table
 CREATE TABLE test_attempts (
     id INT AUTO_INCREMENT PRIMARY KEY,
     test_id INT NOT NULL,
@@ -51,7 +63,7 @@ CREATE TABLE test_attempts (
     FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- 6. Questions Table
+-- 7. Questions Table
 CREATE TABLE questions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     test_id INT NOT NULL,
@@ -61,7 +73,7 @@ CREATE TABLE questions (
     FOREIGN KEY (test_id) REFERENCES tests(id) ON DELETE CASCADE
 );
 
--- 7. Answer Table
+-- 8. Answer Table
 CREATE TABLE answers (
     id INT AUTO_INCREMENT PRIMARY KEY,
     question_id INT NOT NULL,
@@ -70,7 +82,7 @@ CREATE TABLE answers (
     FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE
 );
 
--- 8. Student Answer Table
+-- 9. Student Answer Table
 CREATE TABLE student_answers (
     id INT AUTO_INCREMENT PRIMARY KEY,
     attempt_id INT NOT NULL,

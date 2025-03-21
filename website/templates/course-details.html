@@ -2,7 +2,7 @@
 {% extends 'base.html' %}
 {% block title %}{{ course.name }}{% endblock %}
 {% block content %}
-<div class="container mt-4">
+<div class="container">
     <!-- Breadcrumb navigation -->
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
@@ -14,8 +14,8 @@
     <div class="card shadow-sm mb-4">
         <div class="row g-0">
             <div class="col-md-4">
-                <img src="{{ url_for('static', filename='images/' ~ (course.image_path or 'default_course.jpg')) }}" 
-                    class="img-fluid rounded-start" alt="{{ course.name|lower }}" 
+                <img src="{{ url_for('static', filename='images/' ~ (course.image_path or 'default_course.jpg')) }}"
+                    class="img-fluid rounded-start" alt="{{ course.name|lower }}"
                     style="height: 100%; object-fit: cover;">
             </div>
             <div class="col-md-8">
@@ -32,36 +32,36 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Course content tabs -->
     <ul class="nav nav-tabs mb-3" id="courseDetailTabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" 
+            <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview"
                 type="button" role="tab" aria-controls="overview" aria-selected="true">Overview</button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="tests-tab" data-bs-toggle="tab" data-bs-target="#tests" 
-                type="button" role="tab" aria-controls="tests" aria-selected="false">Tests</button>
+            <button class="nav-link" id="subjects-tab" data-bs-toggle="tab" data-bs-target="#subjects"
+                type="button" role="tab" aria-controls="subjects" aria-selected="false">Subjects</button>
         </li>
         {% if current_user.is_authenticated %}
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="progress-tab" data-bs-toggle="tab" data-bs-target="#progress" 
+            <button class="nav-link" id="progress-tab" data-bs-toggle="tab" data-bs-target="#progress"
                 type="button" role="tab" aria-controls="progress" aria-selected="false">Your Progress</button>
         </li>
         {% endif %}
     </ul>
-    
+
     <div class="tab-content" id="courseDetailTabsContent">
         <!-- Overview tab -->
         <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
             <div class="row">
                 <div class="col-md-8">
                     <h3 class="mb-3">About this course</h3>
-                    
+
                     <div class="mb-4">
                         {{ course.description }}
                     </div>
-                    
+
                     <h4 class="mb-3">What you'll learn</h4>
                     <ul class="list-group list-group-flush mb-4">
                         <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i> Course-specific learning objective 1</li>
@@ -69,7 +69,7 @@
                         <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i> Course-specific learning objective 3</li>
                     </ul>
                 </div>
-                
+
                 <div class="col-md-4">
                     <div class="card mb-4">
                         <div class="card-header">
@@ -77,60 +77,36 @@
                         </div>
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item">
-                                <i class="bi bi-question-circle me-2"></i> <strong>Tests:</strong> {{ tests|length }}
+                                <i class="bi bi-question-circle me-2"></i> <strong>Subjects:</strong> {{ subjects|length }}
                             </li>
                         </ul>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <!-- Tests tab -->
-        <div class="tab-pane fade" id="tests" role="tabpanel" aria-labelledby="tests-tab">
-            {% if tests %}
-                <h3 class="mb-3">Available Tests</h3>
+
+        <!-- Subjects tab -->
+        <div class="tab-pane fade" id="subjects" role="tabpanel" aria-labelledby="subjects-tab">
+            {% if subjects %}
+                <h3 class="mb-3">Available Subjects</h3>
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Test Name</th>
-                                <th>Questions</th>
-                                {% if current_user.is_authenticated %}
-                                <th>Your Score</th>
-                                {% endif %}
+                                <th>Subject Name</th>
+                                <th>Description</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for test in tests %}
+                            {% for subject in subjects %}
                             <tr>
-                                <td>{{ test.name }}</td>
-                                <td>{{ test.question_count }}</td>
-                                {% if current_user.is_authenticated %}
+                                <td>{{ subject.name }}</td>
+                                <td>{{ subject.description }}</td>
                                 <td>
-                                    {% if test.best_score %}
-                                    {{ "%.1f"|format(test.best_score) }}%
-                                    ({{ test.attempt_count }} attempt{{ "s" if test.attempt_count != 1 }})
-                                    {% else %}
-                                    Not attempted
-                                    {% endif %}
-                                </td>
-                                {% endif %}
-                                <td>
-                                    <a href="{{ url_for('tests_bp.take_test', test_id=test.id) }}" class="btn btn-sm btn-primary">
-                                        {% if current_user.is_authenticated and test.best_score %}
-                                        Retake Test
-                                        {% else %}
-                                        Take Test
-                                        {% endif %}
-                                    </a>
-                                    
-                                    {% if current_user.is_authenticated and test.best_score %}
-                                    <a href="{{ url_for('tests_bp.view_results', test_id=test.id) }}" class="btn btn-sm btn-outline-secondary ms-1">View Results</a>
-                                    {% endif %}
-                                    
+                                    <a href="{{ url_for('subjects_bp.view_subject', subject_id=subject.id) }}" class="btn btn-sm btn-primary">View Subject</a>
                                     {% if current_user.id == course.created_by %}
-                                    <a href="{{ url_for('tests_bp.edit_test', test_id=test.id) }}" class="btn btn-sm btn-outline-secondary ms-1">Edit</a>
+                                    <a href="{{ url_for('subjects_bp.edit_subject', subject_id=subject.id) }}" class="btn btn-sm btn-outline-secondary ms-1">Edit</a>
                                     {% endif %}
                                 </td>
                             </tr>
@@ -138,105 +114,110 @@
                         </tbody>
                     </table>
                 </div>
-                
+
                 {% if not current_user.is_authenticated %}
                 <div class="alert alert-info mt-3">
                     <i class="bi bi-info-circle me-2"></i> <a href="{{ url_for('auth.login') }}">Log in</a> to save your test results and track your progress.
                 </div>
                 {% endif %}
-                
+
                 {% if current_user.id == course.created_by %}
                 <div class="mt-3">
-                    <a href="{{ url_for('tests_bp.create_test', course_id=course.id) }}" class="btn btn-success">
-                        <i class="bi bi-plus-circle me-1"></i> Create New Test
+                    <a href="{{ url_for('subjects_bp.create_subject', course_id=course.id) }}" class="btn btn-success">
+                        <i class="bi bi-plus-circle me-1"></i> Create New Subject
                     </a>
                 </div>
                 {% endif %}
             {% else %}
                 <div class="alert alert-info">
-                    <p>No tests are available for this course yet.</p>
+                    <p>No subjects are available for this course yet.</p>
                     {% if current_user.id == course.created_by %}
-                    <a href="{{ url_for('tests_bp.create_test', course_id=course.id) }}" class="btn btn-success mt-2">
-                        <i class="bi bi-plus-circle me-1"></i> Create First Test
+                    <a href="{{ url_for('subjects_bp.create_subject', course_id=course.id) }}" class="btn btn-success mt-2">
+                        <i class="bi bi-plus-circle me-1"></i> Create First Subject
                     </a>
                     {% endif %}
                 </div>
             {% endif %}
         </div>
-        
+
         <!-- Progress tab (only visible to logged-in users) -->
         {% if current_user.is_authenticated %}
         <div class="tab-pane fade" id="progress" role="tabpanel" aria-labelledby="progress-tab">
             <h3 class="mb-3">Your Progress</h3>
-            
-            <div class="card mb-4">
-                <div class="card-header">Test Performance</div>
-                <div class="card-body">
-                    {% if test_attempts %}
-                        <div class="mb-4">
-                            <h5>Overall Progress</h5>
-                            <div class="progress mb-2">
-                                {% set completed_tests = test_attempts|selectattr('score', 'defined')|list|length %}
-                                {% set completion_percentage = (completed_tests / tests|length * 100)|round|int if tests|length > 0 else 0 %}
-                                <div class="progress-bar bg-success" role="progressbar" 
-                                     style="width: {{ completion_percentage }}%" 
-                                     aria-valuenow="{{ completion_percentage }}" aria-valuemin="0" aria-valuemax="100">
-                                    {{ completion_percentage }}%
+        
+            {% if subjects %}
+                {% for subject in subjects %}
+                <div class="card mb-4">
+                    <div class="card-header">{{ subject.name }}</div>
+                    <div class="card-body">
+                        {% set tests_in_subject = subject.tests %}
+                        {% set test_attempts_in_subject = test_attempts_by_subject[subject.id] %}
+        
+                        {% if tests_in_subject %}
+        
+                            <div class="mb-4">
+                                <h5>{{ subject.name }} Progress</h5>
+                                <div class="progress mb-2">
+                                    {% set completed_tests = test_attempts_in_subject|selectattr('score', 'defined')|list|length %}
+                                    {% set total_tests = tests_in_subject|length %}
+                                    {% set completion_percentage = (completed_tests / total_tests * 100)|round|int if total_tests > 0 else 0 %}
+                                    <div class="progress-bar bg-success" role="progressbar"
+                                         style="width: {{ completion_percentage }}%"
+                                         aria-valuenow="{{ completion_percentage }}" aria-valuemin="0" aria-valuemax="100">
+                                        {{ completion_percentage }}%
+                                    </div>
                                 </div>
+                                <p class="small text-muted">{{ completed_tests }} of {{ total_tests }} tests completed</p>
                             </div>
-                            <p class="small text-muted">{{ completed_tests }} of {{ tests|length }} tests completed</p>
-                        </div>
-                        
-                        <h5>Recent Test Attempts</h5>
-                        <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Test</th>
-                                        <th>Date</th>
-                                        <th>Score</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for attempt in test_attempts[:5] %}
-                                    <tr>
-                                        <td>{{ attempt.test_name }}</td>
-                                        <td>{{ attempt.attempt_date.strftime('%b %d, %Y') }}</td>
-                                        <td>
-                                            {% if attempt.score is defined %}
-                                            <span class="badge {{ 'bg-success' if attempt.score >= 70 else 'bg-warning text-dark' if attempt.score >= 50 else 'bg-danger' }}">
-                                                {{ "%.1f"|format(attempt.score) }}%
-                                            </span>
-                                            {% else %}
-                                            <span class="badge bg-secondary">Incomplete</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            <a href="{{ url_for('tests_bp.view_results', attempt_id=attempt.id) }}" class="btn btn-sm btn-outline-primary">View Results</a>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        {% if test_attempts|length > 5 %}
-                        <div class="text-center mt-2">
-                            <a href="{{ url_for('courses.all_attempts', course_id=course.id) }}" class="btn btn-sm btn-outline-secondary">View All Attempts</a>
-                        </div>
-                        {% endif %}
-                    {% else %}
-                        <div class="text-center py-4">
-                            <i class="bi bi-journal-x display-4 text-muted"></i>
-                            <p class="mt-3">You haven't attempted any tests in this course yet.</p>
-                            {% if tests %}
-                            <a href="{{ url_for('tests_bp.take_test', test_id=tests[0].id) }}" class="btn btn-primary mt-2">Take Your First Test</a>
+        
+                            <h5>Recent Test Attempts in {{ subject.name }}</h5>
+        
+                            {% if test_attempts_in_subject %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Test</th>
+                                                <th>Date</th>
+                                                <th>Score</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for attempt in test_attempts_in_subject[:5] %}
+                                            <tr>
+                                                <td>{{ attempt.test.name }}</td>
+                                                <td>{{ attempt.attempt_date.strftime('%b %d, %Y') }}</td>
+                                                <td>
+                                                    {% if attempt.score is defined %}
+                                                    <span class="badge {{ 'bg-success' if attempt.score >= 70 else 'bg-warning text-dark' if attempt.score >= 50 else 'bg-danger' }}">
+                                                        {{ "%.1f"|format(attempt.score) }}%
+                                                    </span>
+                                                    {% else %}
+                                                    <span class="badge bg-secondary">Incomplete</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <a href="{{ url_for('tests_bp.view_results', attempt_id=attempt.id) }}" class="btn btn-sm btn-outline-primary">View Results</a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p>No attempts in this subject yet.</p>
                             {% endif %}
-                        </div>
-                    {% endif %}
+        
+                        {% else %}
+                            <p>No tests available in this subject.</p>
+                        {% endif %}
+                    </div>
                 </div>
-            </div>
+                {% endfor %}
+            {% else %}
+                <p>No subjects available for this course.</p>
+            {% endif %}
         </div>
         {% endif %}
     </div>

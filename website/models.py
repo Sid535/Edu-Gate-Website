@@ -1,5 +1,11 @@
-# models.py
-from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for, flash, current_app
+from flask import Flask
+from flask_login import LoginManager
+from flask_login import UserMixin
+from flask_sqlalchemy import SQLAlchemy
+import bcrypt
+import datetime
+import os
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash, current_app
 from flask_login import login_required, current_user, UserMixin
 from flask_sqlalchemy import SQLAlchemy
 import bcrypt
@@ -41,7 +47,6 @@ class User(db.Model, UserMixin):
     def hash_password(password):
         return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
-
 class PasswordReset(db.Model):
     __tablename__ = 'password_resets'
     
@@ -65,20 +70,32 @@ class Course(db.Model):
     image_path = db.Column(db.String(255), nullable=True)
 
     # Relationships
-    tests = db.relationship('Test', backref='course', lazy=True, cascade='all, delete-orphan')
+    subjects = db.relationship('Subject', backref='course', lazy=True, cascade='all, delete-orphan')  # Relationship to subjects
+
+class Subject(db.Model):
+    __tablename__ = 'subjects'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id', ondelete='CASCADE'), nullable=False)
+    name = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    sequence = db.Column(db.Integer, nullable=False)  # To order subjects within a course
+    created_at = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp())
+    
+    # Relationships
+    tests = db.relationship('Test', backref='subject', lazy=True, cascade='all, delete-orphan')
 
 class Test(db.Model):
     __tablename__ = 'tests'
     
     id = db.Column(db.Integer, primary_key=True)
-    course_id = db.Column(db.Integer, db.ForeignKey('courses.id', ondelete='CASCADE'), nullable=False)
+    subject_id = db.Column(db.Integer, db.ForeignKey('subjects.id', ondelete='CASCADE'), nullable=False)  # Updated from course_id to subject_id
     name = db.Column(db.String(100), nullable=False)
     created_at = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp())
     
     # Relationships
     questions = db.relationship('Question', backref='test', lazy=True, cascade='all, delete-orphan')
     attempts = db.relationship('TestAttempt', backref='test', lazy=True, cascade='all, delete-orphan')
-
 
 class TestAttempt(db.Model):
     __tablename__ = 'test_attempts'
@@ -117,7 +134,6 @@ class Answer(db.Model):
     
     # Relationships
     student_selections = db.relationship('StudentAnswer', backref='selected_answer', lazy=True)
-
 
 class StudentAnswer(db.Model):
     __tablename__ = 'student_answers'

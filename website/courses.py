@@ -1,9 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 from flask_login import login_required, current_user
 from .database import db
-from .models import Course, User, Test, TestAttempt
+from .models import Course, User, Test, TestAttempt, Subject  # Import Subject model
 from .forms import EditCourseForm
-import logging  # Add this for debugging
 
 courses_bp = Blueprint('courses', __name__, url_prefix='/courses')
 
@@ -33,9 +32,7 @@ def edit_course(course_id):
 def course_content(course_id):
     # Fetch the course content based on course_id
     course = Course.query.get_or_404(course_id)
-    # You can add logic here to fetch specific content related to the course
     return render_template('course_content.html', course=course)
-
 
 @property
 def image_filename(self):
@@ -52,18 +49,21 @@ def all_courses():
 def course_details(course_id):
     course = Course.query.get_or_404(course_id)
 
-    # Fetch tests associated with the course
-    tests = Test.query.filter_by(course_id=course_id).all()
+    # Fetch subjects associated with the course
+    subjects = Subject.query.filter_by(course_id=course.id).all()
 
-    # Fetch the user's test attempts for the current course
-    test_attempts = []
+    # Fetch the user's test attempts for each subject
+    test_attempts_by_subject = {}
+    
     if current_user.is_authenticated:
-        test_attempts = TestAttempt.query.filter_by(
-            test_id=Test.id,  # Access test_id correctly
-            student_id=current_user.id
-        ).all()
+        for subject in subjects:
+            test_attempts_by_subject[subject.id] = TestAttempt.query.filter(
+                TestAttempt.student_id == current_user.id,
+                TestAttempt.test.has(subject_id=subject.id)  # Filter by subject ID
+            ).all()
+
     return render_template('course-details.html',
                            course=course,
-                           tests=tests,
-                           test_attempts=test_attempts,
+                           subjects=subjects,
+                           test_attempts_by_subject=test_attempts_by_subject,
                            current_user=current_user)

@@ -1,16 +1,16 @@
 {% extends 'base.html' %}
 
-{% block title %}Home{% endblock %}
+{% block title %}Home - EduGATE{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="container">
   <!-- Hero Section -->
   <div class="row mb-5">
     <div class="col-md-8 offset-md-2 text-center">
-      <h1 class="display-4">Welcome to Our Website</h1>
-      <p class="lead">A modern platform designed to help you achieve your goals.</p>
+      <h1 class="display-4">Welcome to EduGATE</h1>
+      <p class="lead">Your modern platform for mastering the Graduate Aptitude Test in Engineering (GATE).</p>
       <hr class="my-4">
-      <p>Discover our services and see how we can help you succeed.</p>
+      <p>Explore our services and discover how we can help you succeed in your academic journey.</p>
       <a class="btn btn-primary btn-lg" href="#features" role="button">Learn More</a>
     </div>
   </div>
@@ -19,31 +19,32 @@
   <div id="features" class="row mb-5">
     <div class="col-12 text-center mb-4">
         <h2>Our Features</h2>
+        <p class="text-muted">Designed to enhance your learning experience.</p>
     </div>
     <div class="col-md-4 mb-4">
-        <div class="card h-100">
+        <div class="card h-100 shadow-sm">
             <div class="card-body text-center">
                 <i class="bi bi-graph-up display-4 text-primary mb-3"></i>
                 <h3 class="card-title text-nowrap">Personalized Quizzes</h3>
-                <p class="card-text">Personalized Quizzes - AI-driven feedback based on user performance</p>
+                <p class="card-text">AI-driven feedback tailored to your performance, helping you identify strengths and weaknesses.</p>
             </div>
         </div>
     </div>
     <div class="col-md-4 mb-4">
-        <div class="card h-100">
+        <div class="card h-100 shadow-sm">
             <div class="card-body text-center">
                 <i class="bi bi-gear display-4 text-primary mb-3"></i>
-                <h3 class="card-title text-nowrap">Customized Reports</h3> <!-- Added text-nowrap -->
-                <p class="card-text">Customized Reports - Tracks individual progress and provides insights.</p>
+                <h3 class="card-title text-nowrap">Customized Reports</h3>
+                <p class="card-text">Track your individual progress with insights that guide your study plan.</p>
             </div>
         </div>
     </div>
     <div class="col-md-4 mb-4">
-        <div class="card h-100">
+        <div class="card h-100 shadow-sm">
             <div class="card-body text-center">
                 <i class="bi bi-shield-check display-4 text-primary mb-3"></i>
                 <h3 class="card-title text-nowrap">Community Engagement</h3>
-                <p class="card-text">Community Engagement - Connects students for peer discussions and knowledge sharing.</p>
+                <p class="card-text">Connect with peers for discussions, support, and knowledge sharing.</p>
             </div>
         </div>
     </div>
@@ -53,24 +54,16 @@
   <div class="row mb-5 align-items-center">
     <div class="col-md-6">
       <h2>About Us</h2>
-      <p>
-        EduGATE is an AI-driven practice program designed to help students prepare efficiently
-        for the Graduate Aptitude Test in Engineering (GATE).
-      </p>
-      <p>
-        EduGATE provides detailed performance analytics, enabling students to improve their 
-        problem-solving skills and time management.
-      </p>
+      <p>EduGATE is an AI-driven practice program designed to help students prepare efficiently for the Graduate Aptitude Test in Engineering (GATE).</p>
+      <p>We provide detailed performance analytics, enabling students to enhance their problem-solving skills and time management strategies.</p>
       <a href="#" class="btn btn-outline-primary">Read More</a>
     </div>
     <div class="col-md-6 d-flex justify-content-center">
       <div class="card shadow-sm" style="width: 100%; max-width: 400px;">
-        <img src="/static/images/home_page_book.jpg" alt="About Us" 
+        <img src="/static/images/home_page_book.jpg" alt="About EduGATE - Empowering Students" 
             class="card-img-top rounded" style="object-fit: cover; height: 250px;">
       </div>
     </div>
   </div>
 </div>
 {% endblock %}
-
-EduGATE provides detailed performance analytics, enabling students to improve their problem-solving skills and time management
