@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}Manage Questions: {{ test.name }}{% endblock %}
+{% block content %}
+<div class="container">
+    <!-- Breadcrumb navigation -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('courses.all_courses') }}">Courses</a></li>
+            <li class="breadcrumb-item" aria-current="page">
+                <a href="{{ url_for('courses.course_details', course_id=course.id) }}">{{ course.name }}</a>
+            </li>
+            <li class="breadcrumb-item"><a href="{{ url_for('subjects.view_subject', subject_id=test.subject.id) }}">Subject: {{ test.subject.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Manage Questions: {{ test.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h1 class="card-title">Manage Questions: {{ test.name }}</h1>
+            <p class="card-text">Subject: {{ test.subject.name }}</p>
+
+            {% if current_user.id == test.subject.course.created_by %}
+            <!-- Add Question Form -->
+            <h3 class="mt-4">Add New Question</h3>
+            <form method="POST">
+                <div class="mb-3">
+                    <label for="question_text" class="form-label">Question Text:</label>
+                    <textarea class="form-control" id="question_text" name="question_text" rows="3" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="question_type" class="form-label">Question Type:</label>
+                    <select class="form-select" id="question_type" name="question_type">
+                        <option value="MCQ">Multiple Choice</option>
+                        <option value="True/False">True/False</option>
+                        <option value="Short Answer">Short Answer</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="points" class="form-label">Points:</label>
+                    <input type="number" class="form-control" id="points" name="points" value="1.00" required>
+                </div>
+                <button type="submit" class="btn btn-success">Add Question</button>
+            </form>
+
+            <!-- Existing Questions -->
+            <h3 class="mt-4">Existing Questions</h3>
+            {% if questions %}
+            <ul class="list-group">
+                {% for question in questions %}
+                <li class="list-group-item">
+                    {{ question.text }} ({{ question.question_type }}, {{ question.points }} Points)
+                    <a href="{{ url_for('tests.edit_question', question_id=question.id) }}" class="btn btn-sm btn-warning float-end me-2">Edit</a>
+                    <form method="POST" action="{{ url_for('tests.delete_question', question_id=question.id) }}" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-danger float-end">Delete</button>
+                    </form>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p>No questions available for this test yet.</p>
+            {% endif %}
+            {% else %}
+            <div class="alert alert-warning">
+                You are not authorized to manage questions for this test.
+            </div>
+            {% endif %}
+
+            <a href="{{ url_for('subjects.view_subject', subject_id=test.subject.id) }}" class="btn btn-secondary mt-3">Back to Subject</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

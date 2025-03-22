@@ -13,7 +13,7 @@ def edit_course(course_id):
 
     if current_user.id != course.created_by:
         flash("You are not authorized to edit this course.", "danger")
-        return redirect(url_for('courses/courses.course-details', course_id=course.id))
+        return redirect(url_for('courses.course_details', course_id=course.id))
 
     form = EditCourseForm(obj=course)
 
@@ -22,10 +22,16 @@ def edit_course(course_id):
         course.description = form.description.data
         course.image_path = form.image_path.data  # Update the image_path directly
 
-        db.session.commit()
+        try:
+            db.session.commit()
+            flash("Course updated successfully!", "success")
+        except Exception as e:
+            db.session.rollback()  # Rollback in case of error
+            flash("An error occurred while updating the course: {}".format(e), "danger")
         flash("Course updated successfully!", "success")
-        return redirect(url_for('courses/courses.course-details', course_id=course.id))
-
+        return redirect(url_for('courses.course_details', course_id=course.id))
+    else:
+        print(form.errors)
     return render_template('courses/edit_course.html', course=course, form=form)
 
 @courses_bp.route('/<int:course_id>/content')

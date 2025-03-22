@@ -13,7 +13,7 @@ def create_subject(course_id):
     course = Course.query.get_or_404(course_id)
     if current_user.id != course.created_by:
         flash("You are not authorized to add subjects to this course.", "danger")
-        return redirect(url_for('courses/courses.course-details', course_id=course.id))
+        return redirect(url_for('courses.course_details', course_id=course.id))
 
     form = SubjectForm()  # Instantiate the SubjectForm
 
@@ -24,10 +24,15 @@ def create_subject(course_id):
 
         new_subject = Subject(name=name, description=description, course_id=course.id, sequence=sequence)
         db.session.add(new_subject)
-        db.session.commit()
-        flash('Subject created successfully!', 'success')
-        return redirect(url_for('courses/courses.course-details', course_id=course.id))
-
+        try:
+            db.session.commit()
+            flash("Subject Created successfully!", "success")
+        except Exception as e:
+            db.session.rollback()  # Rollback in case of error
+            flash("An error occurred while updating the course: {}".format(e), "danger")
+        return redirect(url_for('courses.course_details', course_id=course.id))
+    else:
+        print(form.errors)
     return render_template('subjects/create_subject.html', course=course, form=form)
 
 
@@ -40,7 +45,7 @@ def edit_subject(subject_id):
 
     if current_user.id != course.created_by:
         flash("You are not authorized to edit this subject.", "danger")
-        return redirect(url_for('courses/courses.course-details', course_id=course.id))
+        return redirect(url_for('courses.course_details', course_id=course.id))
 
     form = SubjectForm(obj=subject)
 
@@ -49,17 +54,25 @@ def edit_subject(subject_id):
         subject.description = form.description.data
         subject.sequence = form.sequence.data
 
-        db.session.commit()
-        flash('Subject updated successfully!', 'success')
-        return redirect(url_for('courses/courses.course-details', course_id=course.course_id))
-
+        try:
+            db.session.commit()
+            flash("Subject updated successfully!", "success")
+        except Exception as e:
+            db.session.rollback()  # Rollback in case of error
+            flash("An error occurred while updating the course: {}".format(e), "danger")
+            
+        return redirect(url_for('courses.course_details', course_id=subject.course_id))
+    else:
+        print(form.errors)
+        
     return render_template('subjects/edit_subject.html', subject=subject, form=form)
 
 # Route to view a specific subject
 @subjects_bp.route('/view/<int:subject_id>')
 def view_subject(subject_id):
     subject = Subject.query.get_or_404(subject_id)
-    return render_template('subjects/view_subject.html', subject=subject)
+    course = subject.course
+    return render_template('subjects/view_subject.html', subject=subject, course=course)
 
 # Route to delete a subject
 @subjects_bp.route('/delete/<int:subject_id>')
@@ -71,9 +84,13 @@ def delete_subject(subject_id):
 
     if current_user.id != course.created_by:
         flash("You are not authorized to delete this subject.", "danger")
-        return redirect(url_for('courses/courses.course-details', course_id=course.id))
-
-    db.session.delete(subject)
-    db.session.commit()
-    flash('Subject deleted successfully!', 'success')
-    return redirect(url_for('courses/courses.course-details', course_id=course_id))
+        return redirect(url_for('courses.course_details', course_id=course.id))
+    try:
+        db.session.delete(subject)
+        db.session.commit()
+        flash("Subject deleted successfully!", "success")
+    except Exception as e:
+        db.session.rollback()  # Rollback in case of error
+        flash("An error occurred while updating the course: {}".format(e), "danger")
+        
+    return redirect(url_for('courses.course_details', course_id=course_id))

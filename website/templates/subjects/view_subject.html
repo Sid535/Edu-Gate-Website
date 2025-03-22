@@ -1,9 +1,46 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container">
-    <h2>Subject: {{ subject.name }}</h2>
-    <p><strong>Description:</strong> {{ subject.description }}</p>
-    <p><strong>Sequence:</strong> {{ subject.sequence }}</p>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('courses.all_courses') }}">Courses</a></li>
+            <li class="breadcrumb-item" aria-current="page">
+                <a href="{{ url_for('courses.course_details', course_id=course.id) }}">{{ course.name }}</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">{{ subject.name }}</li>
+        </ol>
+    </nav>
+
+    <!-- Display Tests -->
+    <h3>Available Tests</h3>
+    {% if subject.tests %}
+    <ul>
+        {% for test in subject.tests %}
+        <li>
+            {{ test.name }}
+            <a href="{{ url_for('tests.take_test', test_id=test.id) }}" class="btn btn-primary btn-sm">Take Test</a>
+            {% if current_user.id == subject.course.created_by %}
+            <a href="{{ url_for('tests.edit_test', test_id=test.id) }}" class="btn btn-outline-secondary btn-sm">Edit Test</a>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>No tests available for this subject yet.</p>
+    {% endif %}
+
+    <!-- Create Test Form -->
+    {% if current_user.id == subject.course.created_by %}
+    <h3>Create New Test</h3>
+    <form method="POST" action="{{ url_for('tests.create_test', subject_id=subject.id) }}">
+        <div class="mb-3">
+            <label for="test_name" class="form-label">Test Name:</label>
+            <input type="text" class="form-control" id="test_name" name="test_name" required>
+        </div>
+        <button type="submit" class="btn btn-success">Create Test</button>
+    </form>
+    {% endif %}
+
     <a href="{{ url_for('courses.course_details', course_id=subject.course_id) }}" class="btn btn-secondary">Back to Course</a>
 </div>
 {% endblock %}

@@ -1,14 +1,50 @@
 {% extends 'base.html' %}
+{% block title %}Create Test for {{ subject.name }}{% endblock %}
 {% block content %}
+<div class="container">
+
+    <!-- Breadcrumb navigation -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('courses.all_courses') }}">Courses</a></li>
+            <li class="breadcrumb-item" aria-current="page">
+                <a href="{{ url_for('courses.course_details', course_id=course.id) }}">{{ course.name }}</a>
+            </li>
+            <li class="breadcrumb-item" aria-current="page">
+                <a href="{{ url_for('subjects.view_subject', subject_id=subject.id) }}">{{ subject.name }}</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">Create Test</li>
+        </ol>
+    </nav>
+
     <div class="container">
-        <h2>Create Test for {{ subject.name }} ({{ course.name }})</h2>
-        <form method="post">
+        <h1>Create New Test for {{ subject.name }}</h1>
+    
+        <!-- Display Flash Messages -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert alert-info">
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+    
+        <form method="POST">
+            {{ form.hidden_tag() }}
+    
             <div class="mb-3">
-                <label for="test_name" class="form-label">Test Name</label>
-                <input type="text" class="form-control" id="test_name" name="test_name" required>
+                <label for="name" class="form-label">Test Name:</label>
+                {{ form.name(class="form-control", id="name", required=True) }}
+                {% for error in form.name.errors %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
             </div>
-            <button type="submit" class="btn btn-primary">Create Test</button>
-            <a href="{{ url_for('courses.course_details', course_id=course.id) }}" class="btn btn-secondary">Cancel</a>
+    
+            <button type="submit" class="btn btn-success">Create Test</button>
         </form>
+    
+        <a href="{{ url_for('subjects.view_subject', subject_id=subject.id) }}" class="btn btn-secondary mt-3">Back to Subject</a>
     </div>
 {% endblock %}

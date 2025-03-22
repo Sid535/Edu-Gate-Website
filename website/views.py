@@ -30,7 +30,7 @@ def account():
             from flask_login import logout_user
             logout_user()
             return redirect('/login')
-            
+
         return render_template('account.html', user=user)
     except Exception as e:
         return f"Error: {str(e)}", 500

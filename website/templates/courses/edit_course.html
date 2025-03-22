@@ -12,9 +12,9 @@
 
         <div class="mb-3">
             {{ form.name.label(class="form-label") }}
-            {{ form.name(class="form-control", value=course.name) }}
+            {{ form.name(class="form-control", required=True) }}
             {% if form.name.errors %}
-                <div class="invalid-feedback">
+                <div class="alert alert-danger">
                     {% for error in form.name.errors %}
                         <span>{{ error }}</span>
                     {% endfor %}
@@ -24,9 +24,9 @@
 
         <div class="mb-3">
             {{ form.description.label(class="form-label") }}
-            {{ form.description(class="form-control", rows="5", value=course.description) }}
+            {{ form.description(class="form-control", rows="5", required=True) }}
             {% if form.description.errors %}
-                <div class="invalid-feedback">
+                <div class="alert alert-danger">
                     {% for error in form.description.errors %}
                         <span>{{ error }}</span>
                     {% endfor %}
@@ -36,10 +36,10 @@
 
         <div class="mb-3">
             {{ form.image_path.label(class="form-label") }}
-            {{ form.image_path(class="form-control", value=course.image_path) }}
+            {{ form.image_path(class="form-control") }}
             <small class="form-text text-muted">Enter the URL or path to the image.</small>
             {% if form.image_path.errors %}
-                <div class="invalid-feedback">
+                <div class="alert alert-danger">
                     {% for error in form.image_path.errors %}
                         <span>{{ error }}</span>
                     {% endfor %}

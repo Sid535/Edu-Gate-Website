@@ -1,8 +1,54 @@
-<!-- take_test.html -->
 {% extends 'base.html' %}
-
-{% block title %} Test {% endblock %}
-
+{% block title %}Take Test: {{ test.name }}{% endblock %}
 {% block content %}
-    <h5>hii</h5>
+<div class="container">
+    <!-- Breadcrumb navigation -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('courses.all_courses') }}">Courses</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('subjects.view_subject', subject_id=test.subject.id) }}">Subject: {{ test.subject.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Take Test: {{ test.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h1 class="card-title">{{ test.name }}</h1>
+            <p class="card-text">Subject: {{ test.subject.name }}</p>
+
+            <form method="POST">
+                {% for question in test.questions %}
+                <div class="mb-4">
+                    <p class="fw-bold">{{ loop.index }}. {{ question.text }}</p>
+                    {% if question.question_type == 'MCQ' %}
+                        {% for answer in question.answers %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="{{ question.id }}" id="answer_{{ answer.id }}" value="{{ answer.id }}" required>
+                            <label class="form-check-label" for="answer_{{ answer.id }}">
+                                {{ answer.text }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    {% elif question.question_type == 'True/False' %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="{{ question.id }}" id="true_{{ question.id }}" value="{{ question.answers[0].id }}" required>
+                            <label class="form-check-label" for="true_{{ question.id }}">True</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="{{ question.id }}" id="false_{{ question.id }}" value="{{ question.answers[1].id }}" required>
+                            <label class="form-check-label" for="false_{{ question.id }}">False</label>
+                        </div>
+                    {% else %}
+                        <div class="form-group">
+                            <input type="text" class="form-control" name="{{ question.id }}" placeholder="Your Answer" required>
+                        </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <button type="submit" class="btn btn-primary">Submit Test</button>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

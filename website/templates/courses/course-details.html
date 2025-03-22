@@ -107,6 +107,7 @@
                                     <a href="{{ url_for('subjects.view_subject', subject_id=subject.id) }}" class="btn btn-sm btn-primary">View Subject</a>
                                     {% if current_user.id == course.created_by %}
                                     <a href="{{ url_for('subjects.edit_subject', subject_id=subject.id) }}" class="btn btn-sm btn-outline-secondary ms-1">Edit</a>
+                                    <a href="{{ url_for('subjects.delete_subject', subject_id=subject.id) }}" class="btn btn-sm btn-outline-secondary ms-1">Delete</a>
                                     {% endif %}
                                 </td>
                             </tr>

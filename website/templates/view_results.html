@@ -1,8 +1,47 @@
-<!-- view_results.html -->
 {% extends 'base.html' %}
-
-{% block title %} Results {% endblock %}
-
+{% block title %}Test Results: {{ attempt.test.name }}{% endblock %}
 {% block content %}
-    <h5>hii</h5>
+<div class="container">
+    <!-- Breadcrumb navigation -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('courses.all_courses') }}">Courses</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('subjects.view_subject', subject_id=attempt.test.subject.id) }}">Subject: {{ attempt.test.subject.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Test Results: {{ attempt.test.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h1 class="card-title">Test Results: {{ attempt.test.name }}</h1>
+            <p class="card-text">Subject: {{ attempt.test.subject.name }}</p>
+            <p><strong>Score:</strong> {{ attempt.score }}</p>
+
+            <h3 class="mt-4">Answer Breakdown</h3>
+            <ul class="list-group">
+                {% for answer in student_answers %}
+                <li class="list-group-item">
+                    <p><strong>Question:</strong> {{ answer.question.text }}</p>
+                    <p><strong>Your Answer:</strong>
+                        {% if answer.selected_answer %}
+                            {{ answer.selected_answer.text }}
+                        {% else %}
+                            No Answer
+                        {% endif %}
+                    </p>
+                    <p><strong>Correct:</strong>
+                        {% if answer.is_correct %}
+                            <i class="bi bi-check-circle-fill text-success"></i> Yes
+                        {% else %}
+                            <i class="bi bi-x-circle-fill text-danger"></i> No
+                        {% endif %}
+                    </p>
+                </li>
+                {% endfor %}
+            </ul>
+
+            <a href="{{ url_for('subjects.view_subject', subject_id=attempt.test.subject.id) }}" class="btn btn-secondary mt-3">Back to Subject</a>
+        </div>
+    </div>
+</div>
 {% endblock %}
