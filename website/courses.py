@@ -13,7 +13,7 @@ def edit_course(course_id):
 
     if current_user.id != course.created_by:
         flash("You are not authorized to edit this course.", "danger")
-        return redirect(url_for('courses.course_details', course_id=course.id))
+        return redirect(url_for('courses/courses.course-details', course_id=course.id))
 
     form = EditCourseForm(obj=course)
 
@@ -24,15 +24,15 @@ def edit_course(course_id):
 
         db.session.commit()
         flash("Course updated successfully!", "success")
-        return redirect(url_for('courses.course_details', course_id=course.id))
+        return redirect(url_for('courses/courses.course-details', course_id=course.id))
 
-    return render_template('edit_course.html', course=course, form=form)
+    return render_template('courses/edit_course.html', course=course, form=form)
 
 @courses_bp.route('/<int:course_id>/content')
 def course_content(course_id):
     # Fetch the course content based on course_id
     course = Course.query.get_or_404(course_id)
-    return render_template('course_content.html', course=course)
+    return render_template('courses/course_content.html', course=course)
 
 @property
 def image_filename(self):
@@ -43,7 +43,7 @@ def all_courses():
     page = request.args.get('page', 1, type=int)
     per_page = 9  # Limit per page for scalability
     courses = Course.query.paginate(page=page, per_page=per_page, error_out=False)
-    return render_template('courses.html', courses=courses.items, pagination=courses)
+    return render_template('courses/courses.html', courses=courses.items, pagination=courses)
 
 @courses_bp.route('/<int:course_id>')
 def course_details(course_id):
@@ -62,7 +62,7 @@ def course_details(course_id):
                 TestAttempt.test.has(subject_id=subject.id)  # Filter by subject ID
             ).all()
 
-    return render_template('course-details.html',
+    return render_template('courses/course-details.html',
                            course=course,
                            subjects=subjects,
                            test_attempts_by_subject=test_attempts_by_subject,

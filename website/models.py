@@ -1,16 +1,11 @@
 from flask import Flask
-from flask_login import LoginManager
-from flask_login import UserMixin
+from flask_login import UserMixin, LoginManager
 from flask_sqlalchemy import SQLAlchemy
 import bcrypt
 import datetime
-import os
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash, current_app
 from flask_login import login_required, current_user, UserMixin
-from flask_sqlalchemy import SQLAlchemy
 import bcrypt
 import datetime
-import os
 from .database import db
 
 # Model definitions

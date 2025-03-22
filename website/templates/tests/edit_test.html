@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Edit Test: {{ test.name }}</h2>
+    
+    <form method="POST">
+        {{ form.hidden_tag() }}  <!-- CSRF protection -->
+        <div class="mb-3">
+            {{ form.name.label(class="form-label") }}
+            {{ form.name(class="form-control") }}
+            {% if form.name.errors %}
+                <div class="text-danger">{{ form.name.errors[0] }}</div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            <label for="test_name" class="form-label">Test Name</label>
+            <input type="text" id="test_name" name="test_name" class="form-control" value="{{ test.name }}" required>
+        </div>
+
+        <!-- You can add more fields here if necessary, e.g., description, duration, etc. -->
+
+        <button type="submit" class="btn btn-primary">Update Test</button>
+        <a href="{{ url_for('tests.view_results', test_id=test.id) }}" class="btn btn-secondary">Cancel</a>
+    </form>
+    
+    {% if get_flashed_messages() %}
+        <div class="alert alert-info mt-3">
+            {% for message in get_flashed_messages() %}
+                {{ message }}<br>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
