@@ -199,7 +199,7 @@
                                                     {% endif %}
                                                 </td>
                                                 <td>
-                                                    <a href="{{ url_for('tests.view_results', attempt_id=attempt.id) }}" class="btn btn-sm btn-outline-primary">View Results</a>
+                                                    <a href="{{ url_for('tests.view_results', test_attempt_id=attempt.id) }}" class="btn btn-sm btn-outline-primary">View Results</a>
                                                 </td>
                                             </tr>
                                             {% endfor %}

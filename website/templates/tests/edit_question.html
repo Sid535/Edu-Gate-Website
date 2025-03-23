@@ -41,6 +41,18 @@
                     <input type="number" class="form-control" id="points" name="points" value="{{ question.points }}" min="1" required>
                 </div>
 
+                <!-- Existing Answers -->
+                <h4>Existing Answers</h4>
+                {% for answer in question.answers %}
+                <div class="mb-2">
+                    <input type="hidden" name="answer_id_{{ answer.id }}" value="{{ answer.id }}">
+                    <input type="text" class="form-control mb-1" name="answer_text_{{ answer.id }}" value="{{ answer.text }}" placeholder="Enter answer option" required>
+                    <label>
+                        <input type="checkbox" name="is_correct_{{ answer.id }}" value="True" {% if answer.is_correct %}checked{% endif %}> Correct Answer
+                    </label>
+                </div>
+                {% endfor %}
+
                 <button type="submit" class="btn btn-success">Update Question</button>
             </form>
 

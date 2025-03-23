@@ -1,6 +1,6 @@
 #forms.py file
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, SubmitField, IntegerField, SelectField
+from wtforms import StringField, TextAreaField, SubmitField, IntegerField, SelectField, BooleanField, DecimalField
 from wtforms.validators import DataRequired, Length, URL, NumberRange
 
 class EditCourseForm(FlaskForm):
@@ -39,5 +39,10 @@ class QuestionForm(FlaskForm):
         ('True/False', 'True/False'),
         ('Short Answer', 'Short Answer')
     ], validators=[DataRequired()])
-    points = IntegerField('Points', default=1, validators=[DataRequired()])
+    points = DecimalField('Points', default=1, validators=[DataRequired()])
     submit = SubmitField('Add Question')
+    
+class AnswerForm(FlaskForm):
+    answer_text = StringField('Answer Text', validators=[DataRequired()])
+    is_correct = BooleanField('Correct Answer')
+    submit = SubmitField('Add Answer')

@@ -6,6 +6,7 @@
     
     <form method="POST">
         {{ form.hidden_tag() }}  <!-- CSRF protection -->
+        
         <div class="mb-3">
             {{ form.name.label(class="form-label") }}
             {{ form.name(class="form-control") }}
@@ -15,22 +16,24 @@
         </div>
 
         <div class="mb-3">
-            <label for="test_name" class="form-label">Test Name</label>
-            <input type="text" id="test_name" name="test_name" class="form-control" value="{{ test.name }}" required>
+            <label for="points" class="form-label">Points:</label>
+            <input type="number" id="points" name="points" class="form-control" value="{{ test.points }}" required min="0.01" step="0.01">
         </div>
-
-        <!-- You can add more fields here if necessary, e.g., description, duration, etc. -->
 
         <button type="submit" class="btn btn-primary">Update Test</button>
-        <a href="{{ url_for('tests.view_results', test_id=test.id) }}" class="btn btn-secondary">Cancel</a>
+        <a href="{{ url_for('tests.manage_questions', test_id=test.id) }}" class="btn btn-secondary mt-2">Cancel</a>
     </form>
     
-    {% if get_flashed_messages() %}
-        <div class="alert alert-info mt-3">
-            {% for message in get_flashed_messages() %}
-                {{ message }}<br>
-            {% endfor %}
-        </div>
-    {% endif %}
+    {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+            <div class="alert alert-info mt-3">
+                {% for category, message in messages %}
+                    {% if category == 'test' %} <!-- Only display messages related to tests -->
+                        {{ message }}<br>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
 </div>
 {% endblock %}

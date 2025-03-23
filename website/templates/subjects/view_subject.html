@@ -33,10 +33,6 @@
     {% if current_user.id == subject.course.created_by %}
     <h3>Create New Test</h3>
     <form method="POST" action="{{ url_for('tests.create_test', subject_id=subject.id) }}">
-        <div class="mb-3">
-            <label for="test_name" class="form-label">Test Name:</label>
-            <input type="text" class="form-control" id="test_name" name="test_name" required>
-        </div>
         <button type="submit" class="btn btn-success">Create Test</button>
     </form>
     {% endif %}
