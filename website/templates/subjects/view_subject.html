@@ -1,42 +1,77 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container">
+<div class="container mt-4">
+    <!-- Breadcrumb Navigation -->
     <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('courses.all_courses') }}">Courses</a></li>
-            <li class="breadcrumb-item" aria-current="page">
-                <a href="{{ url_for('courses.course_details', course_id=course.id) }}">{{ course.name }}</a>
+        <ol class="breadcrumb bg-light p-3 rounded">
+            <li class="breadcrumb-item">
+                <a href="{{ url_for('courses.all_courses') }}" class="text-decoration-none">Courses</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{{ url_for('courses.course_details', course_id=course.id) }}" class="text-decoration-none">{{ course.name }}</a>
             </li>
             <li class="breadcrumb-item active" aria-current="page">{{ subject.name }}</li>
         </ol>
     </nav>
 
-    <!-- Display Tests -->
-    <h3>Available Tests</h3>
-    {% if subject.tests %}
-    <ul>
-        {% for test in subject.tests %}
-        <li>
-            {{ test.name }}
-            <a href="{{ url_for('tests.take_test', test_id=test.id) }}" class="btn btn-primary btn-sm">Take Test</a>
-            {% if current_user.id == subject.course.created_by %}
-            <a href="{{ url_for('tests.edit_test', test_id=test.id) }}" class="btn btn-outline-secondary btn-sm">Edit Test</a>
+    <!-- Display Tests Section -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">Available Tests</h3>
+        </div>
+        <div class="card-body">
+            {% if subject.tests %}
+            <ul class="list-group">
+                {% for test in subject.tests %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>{{ test.name }}</span>
+                    <div>
+                        <a href="{{ url_for('tests.take_test', test_id=test.id) }}" class="btn btn-primary btn-sm me-2">Take Test</a>
+                        {% if current_user.id == subject.course.created_by %}
+                        <a href="{{ url_for('tests.edit_test', test_id=test.id) }}" class="btn btn-outline-secondary btn-sm">Edit Test</a>
+                        {% endif %}
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-muted">No tests available for this subject yet.</p>
             {% endif %}
-        </li>
-        {% endfor %}
-    </ul>
-    {% else %}
-    <p>No tests available for this subject yet.</p>
-    {% endif %}
+        </div>
+    </div>
 
     <!-- Create Test Form -->
     {% if current_user.id == subject.course.created_by %}
-    <h3>Create New Test</h3>
-    <form method="POST" action="{{ url_for('tests.create_test', subject_id=subject.id) }}">
-        <button type="submit" class="btn btn-success">Create Test</button>
-    </form>
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-success text-white">
+            <h3 class="mb-0">Create New Test</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('tests.create_test', subject_id=subject.id) }}">
+                <button type="submit" class="btn btn-success">Create Test</button>
+            </form>
+        </div>
+    </div>
     {% endif %}
 
-    <a href="{{ url_for('courses.course_details', course_id=subject.course_id) }}" class="btn btn-secondary">Back to Course</a>
+    <!-- Back to Course Button -->
+    <div class="text-end mt-3">
+        <a href="{{ url_for('courses.course_details', course_id=subject.course_id) }}" class="btn btn-secondary">Back to Course</a>
+    </div>
 </div>
+
+<!-- Custom Styles -->
+<style>
+    .breadcrumb a {
+        color: #007bff;
+        text-decoration: none;
+    }
+    .breadcrumb a:hover {
+        text-decoration: underline;
+    }
+    .card-header {
+        font-size: 1.25rem;
+        font-weight: bold;
+    }
+</style>
 {% endblock %}
