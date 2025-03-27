@@ -17,6 +17,7 @@
         "minlength",
         "mypool",
         "nowrap",
+        "onchange",
         "ondelete",
         "progressbar",
         "selectattr",

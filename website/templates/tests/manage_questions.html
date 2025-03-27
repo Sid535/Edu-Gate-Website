@@ -30,7 +30,7 @@
                 </div>
                 <div class="mb-3">
                     <label for="question_type" class="form-label">Question Type:</label>
-                    <select class="form-select" id="question_type" name="question_type">
+                    <select class="form-select" id="question_type" name="question_type" onchange="toggleAnswerOptions()">
                         <option value="MCQ">Multiple Choice</option>
                         <option value="True/False">True/False</option>
                         <option value="Short Answer">Short Answer</option>
@@ -48,7 +48,7 @@
                        <div class="input-group mb-2">
                             <input type="text" class="form-control" name="answer_text" placeholder="Enter answer option" required>
                             <div class="input-group-text">
-                                <input type="checkbox" class="form-check-input mt-0 is_correct_checkbox" name="is_correct" value="0" aria-label="Correct Answer">
+                                <input type="checkbox" class="form-check-input mt-0 is_correct_checkbox" name="is_correct_0" aria-label="Correct Answer">
                             </div>
                         </div>
                     </div>
@@ -98,7 +98,7 @@ function addAnswerField() {
     newAnswerDiv.innerHTML = `
         <input type="text" class="form-control" name="answer_text" placeholder="Enter answer option" required>
         <div class="input-group-text">
-            <input type="checkbox" class="form-check-input mt-0 is_correct_checkbox" name="is_correct" value="\${answerCount}" aria-label="Correct Answer">
+            <input type="checkbox" class="form-check-input mt-0 is_correct_checkbox" name="is_correct_${answerCount}" aria-label="Correct Answer">
         </div>
     `;
     answerOptionsDiv.appendChild(newAnswerDiv);
@@ -115,6 +115,20 @@ function addAnswerField() {
                 });
             });
         });
+}
+
+function toggleAnswerOptions() {
+    const questionType = document.getElementById('question_type').value;
+    const answerOptionsSection = document.getElementById('answer_options_section');
+    const correctAnswerSection = document.getElementById('correct_answer_section');
+
+    if (questionType === 'Short Answer') {
+        answerOptionsSection.style.display = 'none';
+        correctAnswerSection.style.display = 'block';
+    } else {
+        answerOptionsSection.style.display = 'block';
+        correctAnswerSection.style.display = 'none';
+    }
 }
 
  // Ensure only one checkbox is checked at a time (initial)

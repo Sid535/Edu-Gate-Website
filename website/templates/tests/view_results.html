@@ -10,38 +10,65 @@
             <li class="breadcrumb-item active" aria-current="page">Test Results: {{ attempt.test.name }}</li>
         </ol>
     </nav>
-
     <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <h1 class="card-title">Test Results: {{ attempt.test.name }}</h1>
-            <p class="card-text">Subject: {{ attempt.test.subject.name }}</p>
-            <p><strong>Score:</strong> {{ attempt.score }}</p>
+    <div class="card-body">
+        <h1 class="card-title">Test Results: {{ attempt.test.name }}</h1>
+        <p class="card-text">Subject: {{ attempt.test.subject.name }}</p>
+        <p><strong>Score:</strong> {{ total_score }} / {{ total_possible_score }}</p>
 
-            <h3 class="mt-4">Answer Breakdown</h3>
-            <ul class="list-group">
-                {% for answer in student_answers %}
-                <li class="list-group-item">
-                    <p><strong>Question:</strong> {{ answer.question.text }}</p>
-                    <p><strong>Your Answer:</strong>
-                        {% if answer.selected_answer %}
-                            {{ answer.selected_answer.text }}
-                        {% else %}
-                            No Answer
-                        {% endif %}
-                    </p>
-                    <p><strong>Correct:</strong>
-                        {% if answer.is_correct %}
-                            <i class="bi bi-check-circle-fill text-success"></i> Yes
-                        {% else %}
-                            <i class="bi bi-x-circle-fill text-danger"></i> No
-                        {% endif %}
-                    </p>
-                </li>
-                {% endfor %}
-            </ul>
-
-            <a href="{{ url_for('subjects.view_subject', subject_id=attempt.test.subject.id) }}" class="btn btn-secondary mt-3">Back to Subject</a>
+        <!-- Visualization Row -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h3>Question Statistics</h3>
+                {{ div_pie | safe }}
+                {{ script_pie | safe }}
+            </div>
+            <div class="col-md-6">
+                <h3>Marks Distribution</h3>
+                {{ div_marks | safe }}
+                {{ script_marks | safe }}
+            </div>
         </div>
+
+        <h3 class="mt-4">Answer Breakdown</h3>
+        <ul class="list-group">
+            {% for answer in student_answers %}
+            <li class="list-group-item">
+                <p><strong>Question:</strong> {{ answer.question.text }}</p>
+                <p><strong>Your Answer:</strong>
+                    {% if answer.selected_answer %}
+                        {{ answer.selected_answer.text }}
+                    {% else %}
+                        No Answer
+                    {% endif %}
+                </p>
+                <p><strong>Correct Answer:</strong>
+                    {% set correct_answers = answer.question.answers | selectattr('is_correct') | list %}
+                    {% if correct_answers %}
+                        {{ correct_answers[0].text }}
+                    {% else %}
+                        No correct answer defined
+                    {% endif %}
+                </p>
+                <p><strong>Result:</strong>
+                    {% if answer.is_correct %}
+                        <i class="bi bi-check-circle-fill text-success"></i> Correct
+                    {% elif answer.is_correct is false %}
+                        <i class="bi bi-x-circle-fill text-danger"></i> Incorrect
+                    {% else %}
+                        <i class="bi bi-dash-circle text-warning"></i> Not Answered
+                    {% endif %}
+                    <small class="text-muted">({{ answer.question.points }} points)</small>
+                </p>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <div class="mt-3">
+            <a href="{{ url_for('subjects.view_subject', subject_id=attempt.test.subject.id) }}" class="btn btn-secondary">Back to Subject</a>
+            <span class="ml-2 text-muted">Total Test Points: {{ attempt.test.total_points }}</span>
+        </div>
+    </div>
     </div>
 </div>
 {% endblock %}

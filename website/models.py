@@ -88,6 +88,10 @@ class Test(db.Model):
     name = db.Column(db.String(100), nullable=False)
     created_at = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp())
     
+    @property
+    def total_points(self):
+        return sum(question.points for question in self.questions)
+    
     # Relationships
     questions = db.relationship('Question', backref='test', lazy=True, cascade='all, delete-orphan')
     attempts = db.relationship('TestAttempt', backref='test', lazy=True, cascade='all, delete-orphan')
