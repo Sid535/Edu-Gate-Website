@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Test Aborted: {{ test.name }}{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('courses.all_courses') }}">Courses</a></li>
+            <li class="breadcrumb-item" aria-current="page">
+                <a href="{{ url_for('courses.course_details', course_id=course.id) }}">{{ course.name }}</a>
+            </li>
+            <li class="breadcrumb-item"><a href="{{ url_for('subjects.view_subject', subject_id=test.subject.id) }}">Subject: {{ test.subject.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Test Aborted: {{ test.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="alert alert-danger" role="alert">
+        <h4 class="alert-heading">Test Aborted!</h4>
+        <p>Your test has been automatically aborted due to multiple tab switches. Please follow the guidelines to avoid this in future attempts.</p>
+        <hr>
+        <p>For more information, please contact your instructor or support team.</p>
+        <a href="{{ url_for('subjects.view_subject', subject_id=test.subject.id) }}" class="btn btn-primary">Return to Subject</a>
+    </div>
+</div>
+{% endblock %}

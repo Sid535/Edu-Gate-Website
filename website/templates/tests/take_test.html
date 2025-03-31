@@ -17,8 +17,12 @@
         </div>
         <div class="card-body">
             <p class="card-text"><strong>Subject:</strong> {{ test.subject.name }}</p>
+            
+            <div class="alert alert-warning" role="alert">
+                <i class="fas fa-exclamation-triangle"></i> Warning: Switching tabs or windows during the test will result in test abortion.
+            </div>
 
-            <form method="POST">
+            <form method="POST" id="testForm">
                 {% for question in test.questions %}
                 <div class="mb-4 p-3 rounded border">
                     <p class="fw-bold">{{ loop.index }}. {{ question.text }}</p>
@@ -53,4 +57,34 @@
         </div>
     </div>
 </div>
+
+<script>
+    let tabSwitches = 0;
+    const MAX_SWITCHES = 2;
+    
+    document.addEventListener("visibilitychange", function() {
+        if (document.hidden) {
+            tabSwitches++;
+            
+            // Show persistent warning
+            const warning = document.createElement('div');
+            warning.className = 'alert alert-danger fixed-top m-3';
+            warning.innerHTML = `
+                <i class="fas fa-exclamation-circle"></i>
+                Tab switch detected (${tabSwitches}/${MAX_SWITCHES}). 
+                ${MAX_SWITCHES - tabSwitches} attempts remaining!
+            `;
+            
+            document.body.prepend(warning);
+            
+            // Redirect to the test_aborted page after max attempts
+            if(tabSwitches >= MAX_SWITCHES) {
+                window.location.href = "{{ url_for('tests.test_aborted', test_id=test.id) }}";
+            }
+            
+            // Remove warning after 5 seconds
+            setTimeout(() => warning.remove(), 5000);
+        }
+    });
+</script>
 {% endblock %}

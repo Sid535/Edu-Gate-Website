@@ -190,10 +190,10 @@
                                                 <td>{{ attempt.test.name }}</td>
                                                 <td>{{ attempt.attempt_date.strftime('%b %d, %Y') }}</td>
                                                 <td>
-                                                    {% if attempt.score is defined %}
-                                                    <span class="badge {{ 'bg-success' if attempt.score >= 70 else 'bg-warning text-dark' if attempt.score >= 50 else 'bg-danger' }}">
-                                                        {{ "%.1f"|format(attempt.score) }}%
-                                                    </span>
+                                                    {% if attempt.score is not none %}
+                                                        <span class="badge {{ 'bg-success' if attempt.score >= 70 else 'bg-warning text-dark' if attempt.score >= 50 else 'bg-danger' }}">
+                                                            {{ "%.1f"|format(attempt.score) }}%
+                                                        </span>
                                                     {% else %}
                                                     <span class="badge bg-secondary">Incomplete</span>
                                                     {% endif %}

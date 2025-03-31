@@ -67,12 +67,23 @@ def edit_test(test_id):
                 flash(f"An error occurred while updating the test: {str(e)}", "danger")
     return render_template('tests/edit_test.html', test=test, form=form)
 
+# Route for test aborting
+@tests_bp.route('/test_aborted/<int:test_id>')
+@login_required
+def test_aborted(test_id):
+    test = Test.query.get_or_404(test_id)
+    subject = test.subject
+    course = subject.course
+    return render_template('tests/test_aborted.html', test=test, course=course, subject=subject)
 
 # Route to take a test
 @tests_bp.route('/take_test/<int:test_id>', methods=['GET', 'POST'])
 @login_required
 def take_test(test_id):
     test = Test.query.get_or_404(test_id)
+    
+    if request.form.get('forced_submission') == 'true':
+        return redirect(url_for('tests/test_aborted', subject_id=test.subject.id))
 
     if request.method == 'POST':
         # Handle answer submission
