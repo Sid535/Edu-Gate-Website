@@ -47,7 +47,7 @@ def image_filename(self):
 @courses_bp.route('/')
 def all_courses():
     page = request.args.get('page', 1, type=int)
-    per_page = 9  # Limit per page for scalability
+    per_page = 9
     courses = Course.query.paginate(page=page, per_page=per_page, error_out=False)
     return render_template('courses/courses.html', courses=courses.items, pagination=courses)
 
@@ -65,7 +65,7 @@ def course_details(course_id):
         for subject in subjects:
             test_attempts_by_subject[subject.id] = TestAttempt.query.filter(
                 TestAttempt.student_id == current_user.id,
-                TestAttempt.test.has(subject_id=subject.id)  # Filter by subject ID
+                TestAttempt.test.has(subject_id=subject.id)
             ).all()
 
     return render_template('courses/course-details.html',
