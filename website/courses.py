@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 from flask_login import login_required, current_user
 from .database import db
-from .models import Course, User, Test, TestAttempt, Subject  # Import Subject model
+from .models import Course, User, Test, TestAttempt, Subject
 from .forms import EditCourseForm
 
 courses_bp = Blueprint('courses', __name__, url_prefix='/courses')
