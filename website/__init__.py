@@ -29,7 +29,7 @@ def create_app():
     login_manager.login_view = "/login"
     login_manager.init_app(app)
     
-    # Import models AFTER initializing db
+    # Import models
     from .models import load_user
     login_manager.user_loader(load_user)
 
